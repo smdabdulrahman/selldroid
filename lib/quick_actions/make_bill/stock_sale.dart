@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/helpers/functions_helper.dart';
@@ -16,24 +17,17 @@ import 'package:selldroid/quick_actions/make_bill/bill_view.dart';
 import 'package:selldroid/settings.dart';
 import 'package:selldroid/settings/addstockitem.dart';
 import 'package:selldroid/show_dialog_boxes.dart';
+import 'package:selldroid/theme_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class StockSaleScreen extends StatefulWidget {
-  const StockSaleScreen({super.key});
+  StockSaleScreen({super.key});
 
   @override
   State<StockSaleScreen> createState() => _StockSaleScreenState();
 }
 
 class _StockSaleScreenState extends State<StockSaleScreen> {
-  // --- Colors ---
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color inputFill = Color(0xFFF3F4F6);
-
   // --- Data ---
   List<StockItem> _stockItems = [];
   List<Customer> _customers = [];
@@ -338,7 +332,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
           .fold(0, (sum, i) => sum + i.qty);
       if ((cartQty + qty) > currentStock) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text("⚠️ Not enough stock!"),
             backgroundColor: Colors.red,
           ),
@@ -409,7 +403,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              title: const Text(
+              title: Text(
                 "Payment Details",
                 style: TextStyle(
                   color: primaryText,
@@ -426,13 +420,13 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                       // Walk-in Indicator logic
                       if (!_isNewCustomerMode && _selectedCustomer == null)
                         Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(8),
+                          margin: EdgeInsets.only(bottom: 12),
+                          padding: EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: Colors.orange.shade50,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Row(
+                          child: Row(
                             children: [
                               Icon(Icons.info, size: 16, color: Colors.orange),
                               SizedBox(width: 8),
@@ -449,7 +443,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
 
                       // Amount Box
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: inputFill,
                           borderRadius: BorderRadius.circular(8),
@@ -457,7 +451,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Total Bill:",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -466,7 +460,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                             ),
                             Text(
                               "₹${FunctionsHelper.format_double(grandTotal.toStringAsFixed(2))}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
                                 color: primaryText,
@@ -475,10 +469,10 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      SizedBox(height: 20),
 
                       // Payment Mode Dropdown
-                      const Text(
+                      Text(
                         "Payment Mode",
                         style: TextStyle(
                           fontSize: 12,
@@ -486,9 +480,9 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                           color: Colors.grey,
                         ),
                       ),
-                      const SizedBox(height: 5),
+                      SizedBox(height: 5),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        padding: EdgeInsets.symmetric(horizontal: 12),
                         decoration: BoxDecoration(
                           border: Border.all(color: Colors.grey.shade300),
                           borderRadius: BorderRadius.circular(8),
@@ -502,9 +496,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                 value: mode,
                                 child: Text(
                                   mode,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                  style: TextStyle(fontWeight: FontWeight.w600),
                                 ),
                               );
                             }).toList(),
@@ -523,18 +515,18 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                         controller: payCtrl,
                         keyboardType: TextInputType.number,
                         autofocus: true,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: accentColor,
                         ),
                         decoration: InputDecoration(
                           labelText: "Received / Paying Amount",
-                          labelStyle: const TextStyle(color: secondaryText),
+                          labelStyle: TextStyle(color: secondaryText),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.currency_rupee,
                             color: accentColor,
                           ),
@@ -556,7 +548,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 "Balance : ",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -600,7 +592,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                     const SizedBox(height: 8),
                                     Text(
                                       "Scan to Pay ₹$currentEnteredAmount",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: accentColor,
                                       ),
@@ -778,15 +770,26 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
     }
   }
 
-  // --- WIDGET BUILD ---
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+  final inputFill = Colors.grey.shade100;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
     bool isInclusive = _prefs?.isGstInclusive ?? false;
 
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "New Stock Sale",
           style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
         ),
@@ -809,24 +812,20 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
         ],
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: primaryText,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
+              padding: EdgeInsets.all(16),
               child: Column(
                 children: [
                   // 1. CUSTOMER SECTION
                   _buildSectionHeader("CUSTOMER DETAILS", Icons.person_outline),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius: BorderRadius.circular(12),
@@ -840,7 +839,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                               !_isNewCustomerMode,
                               () => setState(() => _isNewCustomerMode = false),
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: 10),
                             _buildTabBtn(
                               "New Customer",
                               _isNewCustomerMode,
@@ -848,10 +847,10 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         if (!_isNewCustomerMode)
                           LayoutBuilder(
-                            builder: (context, constraints) {
+                            builder: (context, raints) {
                               return Autocomplete<Customer>(
                                 optionsBuilder: (textValue) {
                                   if (textValue.text.isEmpty) return _customers;
@@ -889,7 +888,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                           ),
                                           child: Container(
                                             width: 320,
-                                            constraints: const BoxConstraints(
+                                            constraints: BoxConstraints(
                                               maxHeight: 160,
                                             ),
                                             child: ListView.separated(
@@ -905,7 +904,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                                   onTap: () => onSelected(c),
                                                   child: Padding(
                                                     padding:
-                                                        const EdgeInsets.symmetric(
+                                                        EdgeInsets.symmetric(
                                                           horizontal: 12,
                                                           vertical: 10,
                                                         ),
@@ -916,21 +915,17 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                                       children: [
                                                         Text(
                                                           c.name,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .w600,
-                                                              ),
+                                                          style: TextStyle(
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                          ),
                                                         ),
                                                         Text(
                                                           c.phoneNumber,
-                                                          style:
-                                                              const TextStyle(
-                                                                fontSize: 12,
-                                                                color:
-                                                                    Colors.grey,
-                                                              ),
+                                                          style: TextStyle(
+                                                            fontSize: 12,
+                                                            color: Colors.grey,
+                                                          ),
                                                         ),
                                                       ],
                                                     ),
@@ -957,7 +952,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                       Icons.person,
                                     ),
                                   ),
-                                  const SizedBox(width: 10),
+                                  SizedBox(width: 10),
                                   Expanded(
                                     child: _buildTextField(
                                       _newCustPhoneCtrl,
@@ -968,14 +963,14 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 10),
+                              SizedBox(height: 10),
                               _buildSearchableStateField(_newCustStateCtrl),
                             ],
                           ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 2. ADD PRODUCT SECTION
                   Row(
@@ -986,7 +981,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                         Icons.shopping_cart_outlined,
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(
+                        padding: EdgeInsets.symmetric(
                           horizontal: 8,
                           vertical: 4,
                         ),
@@ -1015,7 +1010,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       color: cardColor,
                       borderRadius: BorderRadius.circular(12),
@@ -1094,11 +1089,10 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                                     )
                                                   : onSelected(item),
                                               child: Container(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 10,
-                                                    ),
+                                                padding: EdgeInsets.symmetric(
+                                                  horizontal: 12,
+                                                  vertical: 10,
+                                                ),
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -1142,7 +1136,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                 },
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            SizedBox(width: 10),
                             Expanded(
                               flex: 1,
                               child: TextField(
@@ -1150,7 +1144,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                 focusNode: _qtyFocusNode,
                                 keyboardType: TextInputType.number,
                                 textAlign: TextAlign.center,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   color: primaryText,
                                   fontWeight: FontWeight.w600,
@@ -1161,7 +1155,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                   labelText: "Qty",
                                   filled: true,
                                   fillColor: inputFill,
-                                  contentPadding: const EdgeInsets.symmetric(
+                                  contentPadding: EdgeInsets.symmetric(
                                     horizontal: 12,
                                   ),
                                   border: OutlineInputBorder(
@@ -1173,7 +1167,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12),
                         SizedBox(
                           width: double.infinity,
                           height: 45,
@@ -1188,12 +1182,12 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                               ),
                               elevation: 0,
                             ),
-                            icon: const Icon(
+                            icon: Icon(
                               Icons.add,
                               color: Colors.white,
                               size: 18,
                             ),
-                            label: const Text(
+                            label: Text(
                               "Add to List",
                               style: TextStyle(
                                 color: Colors.white,
@@ -1206,7 +1200,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 3. CART LIST
                   if (_cartItems.isNotEmpty) ...[
@@ -1216,10 +1210,9 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                     ),
                     ListView.separated(
                       shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
+                      physics: NeverScrollableScrollPhysics(),
                       itemCount: _cartItems.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 8),
+                      separatorBuilder: (context, index) => SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final item = _cartItems[index];
                         // Calc breakdown
@@ -1241,7 +1234,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                         }
 
                         return Container(
-                          padding: const EdgeInsets.all(12),
+                          padding: EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: cardColor,
                             borderRadius: BorderRadius.circular(12),
@@ -1255,7 +1248,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                 children: [
                                   Text(
                                     item.itemName,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
                                       color: primaryText,
@@ -1265,7 +1258,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                     onTap: () => setState(
                                       () => _cartItems.removeAt(index),
                                     ),
-                                    child: const Icon(
+                                    child: Icon(
                                       Icons.close,
                                       size: 18,
                                       color: Colors.redAccent,
@@ -1273,19 +1266,19 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Row(
                                 children: [
                                   Text(
                                     "${item.qty} x ${FunctionsHelper.format_double((item.amount / item.qty).toStringAsFixed(1))}",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       color: secondaryText,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
+                                    padding: EdgeInsets.symmetric(
                                       horizontal: 4,
                                       vertical: 2,
                                     ),
@@ -1304,7 +1297,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                   ),
                                 ],
                               ),
-                              const Divider(height: 16),
+                              Divider(height: 16),
                               Row(
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
@@ -1328,9 +1321,9 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                         );
                       },
                     ),
-                    const SizedBox(height: 30),
+                    SizedBox(height: 30),
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -1344,7 +1337,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "PAYMENT SUMMARY",
                             style: TextStyle(
                               fontSize: 12,
@@ -1352,15 +1345,15 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                               color: secondaryText,
                             ),
                           ),
-                          const SizedBox(height: 15),
+                          SizedBox(height: 15),
 
                           // TAX INFO BOX
                           _buildTaxInfoBox(),
-                          const SizedBox(height: 10),
+                          SizedBox(height: 10),
 
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 "Discount %",
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
@@ -1368,7 +1361,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                   color: primaryText,
                                 ),
                               ),
-                              const Spacer(),
+                              Spacer(),
                               SizedBox(
                                 width: 80,
                                 height: 35,
@@ -1377,7 +1370,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
                                   onChanged: (v) => setState(() {}),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     filled: true,
                                     fillColor: inputFill,
                                     contentPadding: EdgeInsets.symmetric(
@@ -1392,7 +1385,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                               ),
                             ],
                           ),
-                          const Divider(height: 24),
+                          Divider(height: 24),
                           _buildSummaryRow(
                             "Gross Amount",
                             _calculateSummary()['total_base']!,
@@ -1408,7 +1401,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                             _calculateSummary()['total_taxable']!,
                             isBold: true,
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           if (!_isInterStateSale()) ...[
                             _buildSummaryRow(
                               "Total CGST",
@@ -1423,11 +1416,11 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                               "Total IGST",
                               _calculateSummary()['total_igst']!,
                             ),
-                          const Divider(height: 30, thickness: 1.2),
+                          Divider(height: 30, thickness: 1.2),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 "Grand Total",
                                 style: TextStyle(
                                   fontSize: 16,
@@ -1437,7 +1430,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                               ),
                               Text(
                                 "₹${FunctionsHelper.format_double(_calculateSummary()['final_amount']!.toStringAsFixed(2))}",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: accentColor,
@@ -1445,7 +1438,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
+                          SizedBox(height: 20),
                           SizedBox(
                             width: double.infinity,
                             height: 50,
@@ -1457,7 +1450,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
-                              child: const Text(
+                              child: Text(
                                 "SAVE BILL",
                                 style: TextStyle(
                                   fontSize: 16,
@@ -1471,7 +1464,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                       ),
                     ),
                   ] else
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(40),
                       child: Center(
                         child: Text(
@@ -1507,7 +1500,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
     bool isInter = _isInterStateSale();
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.blue.shade50,
         borderRadius: BorderRadius.circular(8),
@@ -1517,7 +1510,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(Icons.info_outline, size: 18, color: Colors.blue.shade800),
-          const SizedBox(width: 8),
+          SizedBox(width: 8),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1530,7 +1523,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                     color: Colors.blue.shade900,
                   ),
                 ),
-                const SizedBox(height: 2),
+                SizedBox(height: 2),
                 Text(
                   isInter
                       ? "$shopState ➔ $custState (IGST Applied)"
@@ -1547,12 +1540,12 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
 
   Widget _buildSearchableStateField(TextEditingController controller) {
     return LayoutBuilder(
-      builder: (context, constraints) {
+      builder: (context, raints) {
         return RawAutocomplete<String>(
           textEditingController: controller,
           focusNode: FocusNode(),
           optionsBuilder: (TextEditingValue textEditingValue) {
-            if (_stateNames.isEmpty) return const Iterable<String>.empty();
+            if (_stateNames.isEmpty) return Iterable<String>.empty();
             if (textEditingValue.text.isEmpty) return _stateNames;
             return _stateNames.where(
               (String option) => option.toLowerCase().contains(
@@ -1571,7 +1564,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                     controller: textEditingController,
                     focusNode: focusNode,
                     onFieldSubmitted: (String value) => onFieldSubmitted(),
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       hintText: "State (Leave empty for local)",
                       filled: true,
                       fillColor: inputFill,
@@ -1586,7 +1579,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                       ),
                       contentPadding: EdgeInsets.symmetric(horizontal: 12),
                     ),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 14,
                       color: primaryText,
                       fontWeight: FontWeight.w600,
@@ -1604,8 +1597,8 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Container(
-                  width: constraints.maxWidth,
-                  constraints: const BoxConstraints(maxHeight: 200),
+                  width: raints.maxWidth,
+                  constraints: BoxConstraints(maxHeight: 200),
                   child: ListView.builder(
                     padding: EdgeInsets.zero,
                     shrinkWrap: true,
@@ -1613,10 +1606,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                     itemBuilder: (BuildContext context, int index) {
                       final String option = options.elementAt(index);
                       return ListTile(
-                        title: Text(
-                          option,
-                          style: const TextStyle(fontSize: 13),
-                        ),
+                        title: Text(option, style: TextStyle(fontSize: 13)),
                         onTap: () => onSelected(option),
                         dense: true,
                       );
@@ -1633,14 +1623,14 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
 
   Widget _buildSectionHeader(String title, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8, left: 4),
+      padding: EdgeInsets.only(bottom: 8, left: 4),
       child: Row(
         children: [
           Icon(icon, size: 16, color: secondaryText),
-          const SizedBox(width: 6),
+          SizedBox(width: 6),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: secondaryText,
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -1656,7 +1646,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
       child: InkWell(
         onTap: onTap,
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
+          padding: EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
             color: isActive ? accentColor : inputFill,
             borderRadius: BorderRadius.circular(8),
@@ -1691,20 +1681,20 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
         focusNode: focus,
         onEditingComplete: onEdit,
         onChanged: (v) => setState(() {}),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           color: primaryText,
           fontWeight: FontWeight.w600,
         ),
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: const TextStyle(fontSize: 13, color: Colors.grey),
+          hintStyle: TextStyle(fontSize: 13, color: Colors.grey),
           prefixIcon: icon != null
               ? Icon(icon, size: 18, color: Colors.grey)
               : null,
           filled: true,
           fillColor: inputFill,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+          contentPadding: EdgeInsets.symmetric(horizontal: 12),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
             borderSide: BorderSide.none,
@@ -1723,7 +1713,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+        Text(label, style: TextStyle(fontSize: 10, color: Colors.grey)),
         Text(
           "₹${FunctionsHelper.format_double(val.toStringAsFixed(1))}",
           style: TextStyle(
@@ -1743,7 +1733,7 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
     bool isBold = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

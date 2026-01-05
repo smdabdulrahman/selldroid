@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/helpers/file_helper.dart';
 import 'package:selldroid/models/shop.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class EditShopDetailsScreen extends StatefulWidget {
-  const EditShopDetailsScreen({super.key});
+  EditShopDetailsScreen({super.key});
 
   @override
   State<EditShopDetailsScreen> createState() => _EditShopDetailsScreenState();
@@ -36,14 +38,6 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
   // --- NEW: Variables to track original data and navigation ---
   ShopDetails? _originalShop;
   bool _allowPop = false; // To control the PopScope manually
-
-  // Colors
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color inputFill = Color(0xFFF3F4F6);
 
   @override
   void initState() {
@@ -104,7 +98,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
-            title: const Row(
+            title: Row(
               children: [
                 Icon(
                   Icons.warning_amber_rounded,
@@ -115,7 +109,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
                 Text("Unsaved Changes"),
               ],
             ),
-            content: const Text(
+            content: Text(
               "You have unsaved changes. Are you sure you want to discard them and leave?",
               style: TextStyle(fontSize: 15, color: primaryText),
             ),
@@ -333,10 +327,23 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
     );
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+  final inputFill = Colors.grey.shade100;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+
     if (_isLoadingData) {
-      return const Scaffold(
+      return Scaffold(
         backgroundColor: bgColor,
         body: Center(child: CircularProgressIndicator(color: accentColor)),
       );
@@ -356,15 +363,11 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
           backgroundColor: bgColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: primaryText,
-              size: 20,
-            ),
+            icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
             // --- NEW: Call our custom back handler instead of direct pop ---
             onPressed: _handlePopRequest,
           ),
-          title: const Text(
+          title: Text(
             "Edit Shop Details",
             style: TextStyle(
               color: primaryText,
@@ -406,7 +409,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
                           onTap: _pickImage,
                           child: Container(
                             padding: const EdgeInsets.all(8),
-                            decoration: const BoxDecoration(
+                            decoration: BoxDecoration(
                               color: accentColor,
                               shape: BoxShape.circle,
                             ),
@@ -513,7 +516,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
                                       focusNode: focusNode,
                                       onFieldSubmitted: (String value) =>
                                           onFieldSubmitted(),
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 14,
                                         color: primaryText,
                                         fontWeight: FontWeight.w500,
@@ -586,7 +589,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
                                                   return ListTile(
                                                     title: Text(
                                                       option,
-                                                      style: const TextStyle(
+                                                      style: TextStyle(
                                                         fontSize: 14,
                                                         color: primaryText,
                                                       ),
@@ -667,7 +670,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color: secondaryText,
@@ -687,7 +690,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
       controller: controller,
       keyboardType: inputType,
       validator: (val) => (isRequired && val!.isEmpty) ? "Required" : null,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         color: primaryText,
         fontWeight: FontWeight.w500,
@@ -697,10 +700,7 @@ class _EditShopDetailsScreenState extends State<EditShopDetailsScreen> {
         fillColor: inputFill,
         hintText: hint,
         hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,

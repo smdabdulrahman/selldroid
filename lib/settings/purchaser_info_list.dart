@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http; // Import HTTP
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/models/general_models.dart';
 import 'package:selldroid/show_dialog_boxes.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class PurchasersListScreen extends StatefulWidget {
   const PurchasersListScreen({super.key});
@@ -13,14 +15,6 @@ class PurchasersListScreen extends StatefulWidget {
 }
 
 class _PurchasersListScreenState extends State<PurchasersListScreen> {
-  // --- Colors ---
-  static const Color bgColor = Color(0xFFF1F5F9);
-  static const Color primaryText = Color(0xFF334155);
-  static const Color secondaryText = Color(0xFF64748B);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color inputFill = Color(0xFFF8F9FA);
-
   // --- State ---
   List<SupplierInfo> _suppliers = [];
   List<String> _stateNames = []; // Stores API States
@@ -128,7 +122,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  const Text(
+                  Text(
                     "Add Supplier",
                     style: TextStyle(
                       fontSize: 20,
@@ -233,23 +227,8 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                             ];
 
                             // B. Create the Purchase Header linked to newSupplierId
-                            Purchase purchase = Purchase(
-                              supplierInfoId: newSupplierId,
-                              totalAmount: openingBal,
-                              gstAmount: 0,
-                              discount: 0,
-                              finalAmount: openingBal,
-                              paid: 0, // It is unpaid debt
-                              paymentMode: "Cash",
-                              purchasedDate: DateTime.now().toIso8601String(),
-                              lastPaymentDate: DateTime.now().toIso8601String(),
-                            );
 
                             // C. Save to Database
-                            await DatabaseHelper.instance.createPurchase(
-                              purchase,
-                              items,
-                            );
                           }
 
                           if (mounted) {
@@ -281,19 +260,33 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
     );
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+  late Color inputFill;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+    inputFill = const Color(0xFFF3F4F6);
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Suppliers List",
           style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
         ),
         backgroundColor: bgColor,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: primaryText),
+        iconTheme: IconThemeData(color: primaryText),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddSupplierSheet,
@@ -357,7 +350,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                             supplier.name.isNotEmpty
                                 ? supplier.name[0].toUpperCase()
                                 : "?",
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: accentColor,
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
@@ -372,7 +365,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                           children: [
                             Text(
                               supplier.name,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                                 color: primaryText,
@@ -381,7 +374,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                             const SizedBox(height: 4),
                             Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.location_on,
                                   size: 14,
                                   color: secondaryText,
@@ -389,7 +382,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                                 const SizedBox(width: 4),
                                 Text(
                                   supplier.state,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: secondaryText,
                                     fontSize: 12,
                                   ),
@@ -402,7 +395,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          const Text(
+                          Text(
                             "Balance",
                             style: TextStyle(
                               fontSize: 11,
@@ -436,7 +429,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
     padding: const EdgeInsets.only(bottom: 6, left: 4),
     child: Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 11,
         fontWeight: FontWeight.bold,
         color: secondaryText,
@@ -468,7 +461,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
           vertical: 14,
         ),
       ),
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 14,
         color: primaryText,
         fontWeight: FontWeight.w600,
@@ -504,12 +497,8 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                     hintText: _isLoadingStates ? "Loading..." : "State",
                     filled: true,
                     fillColor: inputFill,
-                    prefixIcon: const Icon(
-                      Icons.map,
-                      color: secondaryText,
-                      size: 20,
-                    ),
-                    suffixIcon: const Icon(
+                    prefixIcon: Icon(Icons.map, color: secondaryText, size: 20),
+                    suffixIcon: Icon(
                       Icons.arrow_drop_down,
                       color: secondaryText,
                     ),
@@ -522,7 +511,7 @@ class _PurchasersListScreenState extends State<PurchasersListScreen> {
                       vertical: 14,
                     ),
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     color: primaryText,
                     fontWeight: FontWeight.w600,

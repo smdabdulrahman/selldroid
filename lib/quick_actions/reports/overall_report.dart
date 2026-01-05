@@ -1,7 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
+import 'package:selldroid/helpers/functions_helper.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class OverallReportScreen extends StatefulWidget {
   const OverallReportScreen({super.key});
@@ -11,13 +14,6 @@ class OverallReportScreen extends StatefulWidget {
 }
 
 class _OverallReportScreenState extends State<OverallReportScreen> {
-  // --- Style Constants ---
-  static const Color bgColor = Color(0xFFF8F9FA);
-  static const Color primaryText = Color(0xFF212121);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF00796B); // Teal
-  static const Color cardColor = Colors.white;
-
   // --- State Variables ---
   int _selectedTab = 0; // 0: Daily, 1: Weekly, 2: Monthly
   bool _isLoading = true;
@@ -140,7 +136,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
     // 5. Fetch Recent Transactions (FIX: LIMIT 5)
     _recentTransactions = await db.rawQuery(
       '''
-      SELECT s.id, s.final_amount, s.billed_date, c.name as cust_name
+      SELECT s.id, s.is_stock_sales, s.final_amount, s.billed_date, c.name as cust_name
       FROM sales s
       LEFT JOIN customer c ON s.customer_id = c.id
       WHERE s.billed_date >= ? AND s.billed_date <= ?
@@ -282,7 +278,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: accentColor,
-            colorScheme: const ColorScheme.light(primary: accentColor),
+            colorScheme: ColorScheme.light(primary: accentColor),
             buttonTheme: const ButtonThemeData(
               textTheme: ButtonTextTheme.primary,
             ),
@@ -329,10 +325,12 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                         item['item_name'],
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text("Sold: ${item['sold']}"),
+                      subtitle: Text(
+                        "Sold: ${FunctionsHelper.format_int(item['sold'])}",
+                      ),
                       trailing: Text(
-                        "₹${item['revenue']}",
-                        style: const TextStyle(
+                        "₹${FunctionsHelper.format_double(item['revenue'].toStringAsFixed(2))}",
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: accentColor,
                         ),
@@ -348,19 +346,32 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
     );
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryText),
+          icon: Icon(Icons.arrow_back, color: primaryText),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Overall Sale Report",
           style: TextStyle(
             color: primaryText,
@@ -412,7 +423,8 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                       Expanded(
                         child: _buildMetricCard(
                           title: "REVENUE",
-                          value: "₹${_totalRevenue.toStringAsFixed(0)}",
+                          value:
+                              "₹${FunctionsHelper.format_double(_totalRevenue.toStringAsFixed(0))}",
                           icon: Icons.attach_money,
                         ),
                       ),
@@ -420,7 +432,8 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                       Expanded(
                         child: _buildMetricCard(
                           title: "ITEMS SOLD",
-                          value: "$_totalItemsSold",
+                          value:
+                              "${FunctionsHelper.format_int(_totalItemsSold)}",
                           icon: Icons.inventory_2,
                         ),
                       ),
@@ -508,7 +521,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: secondaryText,
@@ -519,8 +532,8 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 24,
+            style: TextStyle(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: primaryText,
             ),
@@ -552,7 +565,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "Sales Trend",
                 style: TextStyle(
                   fontSize: 16,
@@ -562,7 +575,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
               ),
               Text(
                 periodText,
-                style: const TextStyle(fontSize: 12, color: secondaryText),
+                style: TextStyle(fontSize: 12, color: secondaryText),
               ),
             ],
           ),
@@ -584,7 +597,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                         if (idx >= 0 && idx < _chartBottomTitles.length) {
                           return Text(
                             _chartBottomTitles[idx],
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: secondaryText,
                               fontSize: 10,
                             ),
@@ -644,7 +657,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "Top Selling Items",
                 style: TextStyle(
                   fontSize: 16,
@@ -654,7 +667,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
               ),
               TextButton(
                 onPressed: _showAllTopItems,
-                child: const Text(
+                child: Text(
                   "View All",
                   style: TextStyle(
                     fontSize: 12,
@@ -667,7 +680,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
           ),
           const SizedBox(height: 16),
           _topItems.isEmpty
-              ? const Text(
+              ? Text(
                   "No items sold yet",
                   style: TextStyle(color: secondaryText),
                 )
@@ -693,8 +706,8 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                                 ),
                               ),
                               Text(
-                                "₹${revenue.toStringAsFixed(0)}",
-                                style: const TextStyle(
+                                "₹${FunctionsHelper.format_double(revenue.toStringAsFixed(0))}",
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: accentColor,
                                 ),
@@ -704,7 +717,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                           const SizedBox(height: 4),
                           Text(
                             "${item['sold']} units sold",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: secondaryText,
                             ),
@@ -753,7 +766,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Recent Transactions",
             style: TextStyle(
               fontSize: 16,
@@ -763,7 +776,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
           ),
           const SizedBox(height: 16),
           _recentTransactions.isEmpty
-              ? const Text(
+              ? Text(
                   "No transactions yet",
                   style: TextStyle(color: secondaryText),
                 )
@@ -782,7 +795,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                         CircleAvatar(
                           backgroundColor: bgColor,
                           radius: 20,
-                          child: const Icon(
+                          child: Icon(
                             Icons.receipt,
                             size: 18,
                             color: secondaryText,
@@ -801,8 +814,8 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                                 ),
                               ),
                               Text(
-                                "Bill #S${sale['id']} • $dateStr",
-                                style: const TextStyle(
+                                "Bill ${sale["is_stock_sales"] == 1 ? "S" : "Q"}${sale['id']} • $dateStr",
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: secondaryText,
                                 ),
@@ -811,7 +824,7 @@ class _OverallReportScreenState extends State<OverallReportScreen> {
                           ),
                         ),
                         Text(
-                          "+ ₹${sale['final_amount']}",
+                          "+ ₹${FunctionsHelper.format_int(sale['final_amount'])}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,

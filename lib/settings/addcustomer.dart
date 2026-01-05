@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/models/general_models.dart';
 import 'package:selldroid/show_dialog_boxes.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class ManageCustomersScreen extends StatefulWidget {
   const ManageCustomersScreen({super.key});
@@ -27,14 +29,6 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
 
   bool _isLoading = true;
   bool _isLoadingStates = false;
-
-  // Colors
-  static const Color bgColor = Color(0xFFF1F5F9);
-  static const Color primaryText = Color(0xFF334155);
-  static const Color secondaryText = Color(0xFF64748B);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color deleteColor = Color(0xFFEF4444);
 
   @override
   void initState() {
@@ -135,7 +129,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text("Delete", style: TextStyle(color: deleteColor)),
+            child: Text("Delete", style: TextStyle(color: deleteColor)),
           ),
         ],
       ),
@@ -181,7 +175,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               "Edit Customer",
               style: TextStyle(
                 fontSize: 22,
@@ -215,7 +209,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: const Text(
+                    child: Text(
                       "Cancel",
                       style: TextStyle(
                         color: secondaryText,
@@ -263,22 +257,30 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
     );
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+  final deleteColor = const Color(0xFFEF5350);
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: primaryText,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Manage Customers",
           style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
         ),
@@ -301,7 +303,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       "Add New Customer",
                       style: TextStyle(
                         fontSize: 14,
@@ -388,7 +390,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                 controller: _searchController,
                 decoration: InputDecoration(
                   hintText: "Search customer...",
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.search,
                     color: secondaryText,
                     size: 20,
@@ -426,7 +428,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                     _allCustomers.isEmpty
                         ? "No customers added yet."
                         : "No matching customers found.",
-                    style: const TextStyle(color: secondaryText),
+                    style: TextStyle(color: secondaryText),
                   ),
                 ),
               )
@@ -481,7 +483,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                       hintText: _isLoadingStates ? "Loading..." : "State",
                       filled: true,
                       fillColor: const Color(0xFFF8F9FA),
-                      prefixIcon: const Icon(
+                      prefixIcon: Icon(
                         Icons.map,
                         color: secondaryText,
                         size: 16,
@@ -560,7 +562,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
               color: accentColor.withOpacity(0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.person, color: accentColor, size: 18),
+            child: Icon(Icons.person, color: accentColor, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -569,7 +571,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
               children: [
                 Text(
                   customer.name,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                     color: primaryText,
@@ -578,13 +580,13 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                 const SizedBox(height: 2),
                 Text(
                   "${customer.phoneNumber} • ${customer.state}",
-                  style: const TextStyle(color: secondaryText, fontSize: 11),
+                  style: TextStyle(color: secondaryText, fontSize: 11),
                 ),
               ],
             ),
           ),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert, color: secondaryText, size: 18),
+            icon: Icon(Icons.more_vert, color: secondaryText, size: 18),
             padding: EdgeInsets.zero,
             onSelected: (value) {
               if (value == 'edit') _showEditSheet(customer);
@@ -602,7 +604,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'delete',
                 height: 35,
                 child: Row(
@@ -627,7 +629,7 @@ class _ManageCustomersScreenState extends State<ManageCustomersScreen> {
     padding: const EdgeInsets.only(bottom: 4, left: 2), // Tighter label padding
     child: Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: 10,
         fontWeight: FontWeight.bold,
         color: secondaryText,

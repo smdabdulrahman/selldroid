@@ -1,7 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
+import 'package:selldroid/helpers/functions_helper.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class ExpenseReportScreen extends StatefulWidget {
   const ExpenseReportScreen({super.key});
@@ -11,13 +14,6 @@ class ExpenseReportScreen extends StatefulWidget {
 }
 
 class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
-  // --- CUSTOM COLOR THEME ---
-  static const Color bgColor = Color.fromARGB(255, 244, 242, 242);
-  static const Color primaryText = Color.fromARGB(255, 70, 73, 76);
-  static const Color secondaryText = Color.fromARGB(255, 76, 92, 104);
-  static const Color accentColor = Color.fromARGB(255, 25, 133, 161);
-  static const Color cardColor = Colors.white;
-
   // --- State Variables ---
   int _selectedTab = 0; // 0: Daily, 1: Weekly, 2: Monthly
   bool _isLoading = true;
@@ -215,7 +211,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       lastDate: DateTime.now(),
       builder: (ctx, child) => Theme(
         data: ThemeData.light().copyWith(
-          colorScheme: const ColorScheme.light(primary: accentColor),
+          colorScheme: ColorScheme.light(primary: accentColor),
         ),
         child: child!,
       ),
@@ -229,23 +225,31 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
     }
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: primaryText,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Expense Reports",
           style: TextStyle(
             color: primaryText,
@@ -304,7 +308,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       Expanded(
                         child: _buildMetricCard(
                           title: "TOTAL SPENT",
-                          value: "₹${_totalExpenses.toStringAsFixed(0)}",
+                          value:
+                              "₹${FunctionsHelper.format_double(_totalExpenses.toStringAsFixed(0))}",
                           icon: Icons.money_off,
                         ),
                       ),
@@ -312,7 +317,8 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                       Expanded(
                         child: _buildMetricCard(
                           title: "TRANSACTIONS",
-                          value: "$_totalTransactions",
+                          value:
+                              "${FunctionsHelper.format_int(_totalTransactions)}",
                           icon: Icons.receipt_long,
                         ),
                       ),
@@ -408,7 +414,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
               const SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: secondaryText,
@@ -419,7 +425,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           const SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: primaryText,
@@ -443,7 +449,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Spending Trend",
             style: TextStyle(
               fontSize: 16,
@@ -470,7 +476,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                             _chartBottomTitles[idx].isNotEmpty)
                           return Text(
                             _chartBottomTitles[idx],
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: secondaryText,
                               fontSize: 10,
                             ),
@@ -526,7 +532,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Top Categories",
             style: TextStyle(
               fontSize: 16,
@@ -536,7 +542,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           ),
           const SizedBox(height: 16),
           _topCategories.isEmpty
-              ? const Text(
+              ? Text(
                   "No expenses recorded",
                   style: TextStyle(color: secondaryText),
                 )
@@ -553,7 +559,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                             children: [
                               Text(
                                 item['category'],
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                   color: primaryText,
@@ -562,7 +568,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                               const SizedBox(height: 4),
                               Text(
                                 "${item['tx_count']} transactions",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: secondaryText,
                                 ),
@@ -570,7 +576,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                             ],
                           ),
                           Text(
-                            "₹${total.toStringAsFixed(0)}",
+                            "₹${FunctionsHelper.format_double(total.toStringAsFixed(0))}",
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.redAccent,
@@ -596,7 +602,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Recent Expenses",
             style: TextStyle(
               fontSize: 16,
@@ -606,10 +612,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
           ),
           const SizedBox(height: 16),
           _recentExpenses.isEmpty
-              ? const Text(
-                  "No expenses yet",
-                  style: TextStyle(color: secondaryText),
-                )
+              ? Text("No expenses yet", style: TextStyle(color: secondaryText))
               : ListView.separated(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
@@ -622,7 +625,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                         CircleAvatar(
                           backgroundColor: bgColor,
                           radius: 20,
-                          child: const Icon(
+                          child: Icon(
                             Icons.category,
                             size: 18,
                             color: secondaryText,
@@ -644,7 +647,7 @@ class _ExpenseReportScreenState extends State<ExpenseReportScreen> {
                                 DateFormat(
                                   'dd MMM',
                                 ).format(DateTime.parse(expense['date'])),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: secondaryText,
                                 ),

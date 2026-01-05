@@ -3,24 +3,20 @@ import 'dart:io';
 import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/gst_stock_settings.dart';
 import 'package:selldroid/home.dart';
+import 'package:selldroid/theme_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 class SellDroidWelcomeScreen extends StatelessWidget {
   const SellDroidWelcomeScreen({super.key});
 
-  // Color Palette based on the image and previous context
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color buttonColorTeal = Color(0xFF2585A1); // Cerulean
-  static const Color buttonColorSlate = Color(0xFF4C5C68); // Dark Slate
-
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: theme.bgColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
@@ -41,7 +37,7 @@ class SellDroidWelcomeScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.w800,
-                  color: primaryText,
+                  color: theme.primaryText,
                   height: 1.2,
                   letterSpacing: -0.5,
                 ),
@@ -52,7 +48,7 @@ class SellDroidWelcomeScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
-                  color: secondaryText,
+                  color: theme.secondaryText,
                   height: 1.4,
                 ),
               ),
@@ -65,7 +61,7 @@ class SellDroidWelcomeScreen extends StatelessWidget {
                 title: "Import Backup",
                 subtitle: "Restore business data",
                 icon: Icons.cloud_download_outlined,
-                color: buttonColorTeal,
+                color: theme.accentColor,
                 onTap: () async {
                   debugPrint("Import Backup Tapped");
                   FilePickerResult? result = await FilePicker.platform
@@ -98,7 +94,7 @@ class SellDroidWelcomeScreen extends StatelessWidget {
                 title: "Start Fresh",
                 subtitle: "Set up a new store",
                 icon: Icons.storefront_outlined,
-                color: buttonColorSlate,
+                color: const Color(0xFF4C5C68),
                 onTap: () {
                   debugPrint("Start Fresh Tapped");
                   Navigator.push(

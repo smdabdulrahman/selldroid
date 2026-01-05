@@ -1,49 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart'; // Import Provider
 import 'package:selldroid/helpers/file_helper.dart';
+import 'package:selldroid/splash_screen.dart';
+import 'package:selldroid/theme_provider.dart';
 
-import 'package:selldroid/splash_screen.dart'; // Ensure this path is correct
-
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized(); // Required for async calls in main
   FileHelper.createFolderInMedia();
-  runApp(const MyApp());
+
+  runApp(
+    MultiProvider(
+      providers: [
+        // Initialize ThemeProvider and load saved colors immediately
+        ChangeNotifierProvider(create: (_) => ThemeProvider()..loadTheme()),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // --- 1. Define Colors from your file ---
-  static const Color kPrimaryColor = Color.fromARGB(255, 25, 133, 161); // Teal
-  static const Color kBackgroundColor = Color.fromARGB(
-    255,
-    220,
-    220,
-    221,
-  ); // Light Grey
-  static const Color kPrimaryText = Color.fromARGB(
-    255,
-    70,
-    73,
-    76,
-  ); // Dark Grey
-  static const Color kSecondaryText = Color.fromARGB(255, 76, 92, 104); // Slate
-  static const Color kBorderColor = Color.fromARGB(
-    255,
-    197,
-    195,
-    198,
-  ); // Medium Grey
-
-  // We use White for cards/inputs to ensure contrast against the grey background
-  static const Color kCardColor = Colors.white;
-
   @override
   Widget build(BuildContext context) {
-    // Set Status Bar to transparent so background color shows through
+    // 1. Listen to the ThemeProvider
+    // Using context.watch ensures the app rebuilds when colors change
+    final theme = context.watch<ThemeProvider>();
+
+    // Set Status Bar color dynamically based on the current background color
     SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
+      SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness
+            .dark, // Adjust based on theme.bgColor brightness if needed
       ),
     );
 
@@ -51,30 +42,30 @@ class MyApp extends StatelessWidget {
       title: 'SellDroid',
       debugShowCheckedModeBanner: false,
 
-      // --- 2. GLOBAL THEME CONFIGURATION ---
+      // --- 2. GLOBAL THEME CONFIGURATION (Dynamic) ---
       theme: ThemeData(
         useMaterial3: true,
 
-        // Define the Color Scheme
+        // Define the Color Scheme using Provider colors
         colorScheme: ColorScheme.fromSeed(
-          seedColor: kPrimaryColor,
-          primary: kPrimaryColor,
-          surface: kBackgroundColor,
-          onSurface: kPrimaryText,
+          seedColor: theme.accentColor, // Was kPrimaryColor
+          primary: theme.accentColor,
+          surface: theme.bgColor, // Was kBackgroundColor
+          onSurface: theme.primaryText, // Was kPrimaryText
         ),
 
         // Scaffold (Page) Background
-        scaffoldBackgroundColor: kBackgroundColor,
+        scaffoldBackgroundColor: theme.bgColor,
 
         // AppBar Theme
-        appBarTheme: const AppBarTheme(
-          backgroundColor: kBackgroundColor,
+        appBarTheme: AppBarTheme(
+          backgroundColor: theme.bgColor,
           elevation: 0,
           centerTitle: true,
           scrolledUnderElevation: 0,
-          iconTheme: IconThemeData(color: kPrimaryText),
+          iconTheme: IconThemeData(color: theme.primaryText),
           titleTextStyle: TextStyle(
-            color: kPrimaryText,
+            color: theme.primaryText,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -83,8 +74,8 @@ class MyApp extends StatelessWidget {
         // Button Theme
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ElevatedButton.styleFrom(
-            backgroundColor: kPrimaryColor,
-            foregroundColor: Colors.white,
+            backgroundColor: theme.accentColor,
+            foregroundColor: Colors.white, // Keep text white for contrast
             elevation: 2,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
@@ -100,14 +91,14 @@ class MyApp extends StatelessWidget {
         // Input Field (TextField) Theme
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
-          fillColor: kCardColor, // White fill looks best on grey background
+          fillColor: theme.cardColor, // Was kCardColor
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
             vertical: 14,
           ),
-          hintStyle: const TextStyle(color: kSecondaryText, fontSize: 14),
+          hintStyle: TextStyle(color: theme.secondaryText, fontSize: 14),
 
-          // Default Border (using your Medium Grey)
+          // Default Border
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -118,7 +109,7 @@ class MyApp extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: kPrimaryColor, width: 1.5),
+            borderSide: BorderSide(color: theme.accentColor, width: 1.5),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -127,16 +118,28 @@ class MyApp extends StatelessWidget {
         ),
 
         // Floating Action Button
-        floatingActionButtonTheme: const FloatingActionButtonThemeData(
-          backgroundColor: kPrimaryColor,
+        floatingActionButtonTheme: FloatingActionButtonThemeData(
+          backgroundColor: theme.accentColor,
           foregroundColor: Colors.white,
         ),
 
         // Divider Theme
-        dividerTheme: const DividerThemeData(color: kBorderColor, thickness: 1),
+        dividerTheme: DividerThemeData(
+          color: Colors.grey.shade300, // Or derive from secondaryText
+          thickness: 1,
+        ),
+
+        // Card Theme
+        cardTheme: CardThemeData(
+          color: theme.cardColor,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
       ),
 
-      home: const SplashScreen(), // Ensure you have this screen
+      home: const SplashScreen(),
     );
   }
 }

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/quick_actions/make_bill/bill_view.dart';
+import 'package:selldroid/theme_provider.dart';
 // Optional: Import PDF Generator if you want to reprint
 // import 'package:selldroid/helpers/pdf_generator.dart';
 
@@ -13,11 +15,6 @@ class AllBillsScreen extends StatefulWidget {
 }
 
 class _AllBillsScreenState extends State<AllBillsScreen> {
-  // --- Theme Colors ---
-  final Color colBackground = const Color(0xFFEFF2F5);
-  final Color colPrimary = const Color(0xFF127D95);
-  final Color colTextDark = const Color(0xFF2D3436);
-  final Color colTextLight = const Color(0xFF636E72);
   static NumberFormat num_format = NumberFormat.decimalPattern("en_IN");
   // --- State ---
   List<Map<String, dynamic>> _allSales = [];
@@ -98,7 +95,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
     });
   }
 
-  Future<void> _pickCustomDate() async {
+  Future<void> _pickCustomDate(ThemeProvider theme) async {
     final DateTimeRange? picked = await showDateRangePicker(
       context: context,
       firstDate: DateTime(2020),
@@ -106,8 +103,8 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            primaryColor: colPrimary,
-            colorScheme: ColorScheme.light(primary: colPrimary),
+            primaryColor: theme.accentColor,
+            colorScheme: ColorScheme.light(primary: theme.accentColor),
           ),
           child: child!,
         );
@@ -125,6 +122,8 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+
     // Calculate Totals for the current view
     double totalRevenue = _filteredSales.fold(
       0,
@@ -132,25 +131,30 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
     );
 
     return Scaffold(
-      backgroundColor: colBackground,
+      backgroundColor: theme.bgColor,
       appBar: AppBar(
-        backgroundColor: colBackground,
+        backgroundColor: theme.bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colTextDark),
+          icon: Icon(Icons.arrow_back, color: theme.primaryText),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
           "Sales History",
-          style: TextStyle(color: colTextDark, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: theme.primaryText,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           IconButton(
             icon: Icon(
               Icons.calendar_month_outlined,
-              color: _selectedFilter == 4 ? colPrimary : colTextDark,
+              color: _selectedFilter == 4
+                  ? theme.accentColor
+                  : theme.primaryText,
             ),
-            onPressed: _pickCustomDate,
+            onPressed: () => _pickCustomDate(theme),
           ),
         ],
       ),
@@ -162,12 +166,12 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [colPrimary, colPrimary.withOpacity(0.8)],
+                colors: [theme.accentColor, theme.accentColor.withOpacity(0.8)],
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: colPrimary.withOpacity(0.3),
+                  color: theme.accentColor.withOpacity(0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -222,7 +226,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
                 hintText: "Search Bill # or Customer...",
                 prefixIcon: const Icon(Icons.search, color: Colors.grey),
                 filled: true,
-                fillColor: Colors.white,
+                fillColor: theme.cardColor,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -238,13 +242,13 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             child: Row(
               children: [
-                _buildFilterChip("All", 0),
+                _buildFilterChip("All", 0, theme),
                 const SizedBox(width: 8),
-                _buildFilterChip("Today", 1),
+                _buildFilterChip("Today", 1, theme),
                 const SizedBox(width: 8),
-                _buildFilterChip("Weekly", 2),
+                _buildFilterChip("Weekly", 2, theme),
                 const SizedBox(width: 8),
-                _buildFilterChip("Monthly", 3),
+                _buildFilterChip("Monthly", 3, theme),
                 if (_selectedFilter == 4 && _customDateRange != null) ...[
                   const SizedBox(width: 8),
                   Chip(
@@ -252,7 +256,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
                       "${DateFormat('dd/MM').format(_customDateRange!.start)} - ${DateFormat('dd/MM').format(_customDateRange!.end)}",
                       style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
-                    backgroundColor: colPrimary,
+                    backgroundColor: theme.accentColor,
                     deleteIcon: const Icon(
                       Icons.close,
                       size: 16,
@@ -277,12 +281,12 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredSales.isEmpty
-                ? _buildEmptyState()
+                ? _buildEmptyState(theme)
                 : ListView.builder(
                     padding: const EdgeInsets.all(16),
                     itemCount: _filteredSales.length,
                     itemBuilder: (context, index) {
-                      return _buildBillCard(_filteredSales[index]);
+                      return _buildBillCard(_filteredSales[index], theme);
                     },
                   ),
           ),
@@ -291,7 +295,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, int index) {
+  Widget _buildFilterChip(String label, int index, ThemeProvider theme) {
     bool isSelected = _selectedFilter == index;
     return ChoiceChip(
       checkmarkColor: Colors.white,
@@ -304,13 +308,13 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
           _applyFilters();
         });
       },
-      selectedColor: colPrimary,
+      selectedColor: theme.accentColor,
       labelStyle: TextStyle(
-        color: isSelected ? Colors.white : colTextDark,
+        color: isSelected ? Colors.white : theme.primaryText,
         fontWeight: FontWeight.bold,
         fontSize: 12,
       ),
-      backgroundColor: Colors.white,
+      backgroundColor: theme.cardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
         side: BorderSide.none,
@@ -319,7 +323,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
     );
   }
 
-  Widget _buildBillCard(Map<String, dynamic> sale) {
+  Widget _buildBillCard(Map<String, dynamic> sale, ThemeProvider theme) {
     String dateStr = DateFormat(
       'dd MMM yyyy • hh:mm a',
     ).format(DateTime.parse(sale['billed_date']));
@@ -335,7 +339,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -361,7 +365,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
                   "#${sale['id']}",
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: colTextLight,
+                    color: theme.secondaryText,
                   ),
                 ),
               ),
@@ -370,7 +374,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: colPrimary,
+                  color: theme.accentColor,
                 ),
               ),
             ],
@@ -399,13 +403,16 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: colTextDark,
+                        color: theme.primaryText,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       dateStr,
-                      style: TextStyle(fontSize: 12, color: colTextLight),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: theme.secondaryText,
+                      ),
                     ),
                   ],
                 ),
@@ -461,11 +468,11 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
                     },
                     child: CircleAvatar(
                       radius: 16,
-                      backgroundColor: colPrimary.withOpacity(0.1),
+                      backgroundColor: theme.accentColor.withOpacity(0.1),
                       child: Icon(
                         Icons.arrow_forward,
                         size: 16,
-                        color: colPrimary,
+                        color: theme.accentColor,
                       ),
                     ),
                   ),
@@ -478,7 +485,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(ThemeProvider theme) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -487,7 +494,7 @@ class _AllBillsScreenState extends State<AllBillsScreen> {
           const SizedBox(height: 16),
           Text(
             "No bills found",
-            style: TextStyle(color: colTextLight, fontSize: 16),
+            style: TextStyle(color: theme.secondaryText, fontSize: 16),
           ),
         ],
       ),

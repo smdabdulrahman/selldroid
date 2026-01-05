@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // REQUIRED: Add intl to pubspec.yaml
+import 'package:provider/provider.dart';
 import 'package:selldroid/quick_actions/expenses.dart';
 import 'package:selldroid/quick_actions/payments_page.dart';
 import 'package:selldroid/quick_actions/purchase_entry_page.dart';
@@ -11,6 +12,7 @@ import 'package:selldroid/quick_actions/make_bill.dart';
 import 'package:selldroid/models/shop.dart';
 import 'package:selldroid/settings.dart';
 import 'package:selldroid/settings/expense_categories.dart';
+import 'package:selldroid/theme_provider.dart';
 // import 'purchase_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -31,12 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _todayOrdersCount = 0;
   String _currentDate = "";
 
-  // --- Colors ---
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
+  // --- Colors are now managed by ThemeProvider ---
 
   @override
   void initState() {
@@ -110,8 +107,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: theme.bgColor,
       body: SafeArea(
         child: RefreshIndicator(
           onRefresh: _handleRefresh,
@@ -133,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 45,
                           decoration: BoxDecoration(
                             color: _logoPath == null
-                                ? accentColor
+                                ? theme.accentColor
                                 : Colors.white,
                             borderRadius: BorderRadius.circular(12),
                             image: _logoPath != null
@@ -155,19 +153,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
                         // SHOP NAME
                         _isLoading
-                            ? const SizedBox(
+                            ? SizedBox(
                                 width: 100,
                                 height: 20,
                                 child: LinearProgressIndicator(
-                                  color: accentColor,
+                                  color: theme.accentColor,
                                 ),
                               )
                             : Text(
                                 _shopName,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: primaryText,
+                                  color: theme.primaryText,
                                 ),
                               ),
                       ],
@@ -190,9 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.settings,
-                          color: secondaryText,
+                          color: theme.secondaryText,
                           size: 20,
                         ),
                       ),
@@ -205,8 +203,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 // --- 2. Date Display (ABOVE THE BOX) ---
                 Text(
                   _currentDate,
-                  style: const TextStyle(
-                    color: secondaryText,
+                  style: TextStyle(
+                    color: theme.secondaryText,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -217,13 +215,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 // --- 3. Sales Dashboard Card (REAL DATA) ---
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.all(24),
+                  padding: EdgeInsets.all(24),
                   decoration: BoxDecoration(
-                    color: accentColor,
+                    color: theme.accentColor,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: accentColor.withOpacity(0.3),
+                        color: theme.accentColor.withOpacity(0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -280,12 +278,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(height: 32),
 
                 // --- 4. Quick Actions ---
-                const Text(
+                Text(
                   "Quick Actions",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: primaryText,
+                    color: theme.primaryText,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -296,7 +294,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   title: "Make Bill",
                   subtitle: "Create new invoice",
                   iconBgColor: const Color(0xFFE0F2F1),
-                  iconColor: accentColor,
+                  iconColor: theme.accentColor,
+                  theme: theme,
                   onTap: () async {
                     await Navigator.push(
                       context,
@@ -314,6 +313,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Expanded(
                       child: _buildSmallActionCard(
+                        theme: theme,
                         icon: Icons.account_balance_wallet,
                         title: "Expense",
                         subtitle: "Track costs",
@@ -333,6 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(width: 16),
                     Expanded(
                       child: _buildSmallActionCard(
+                        theme: theme,
                         icon: Icons.bar_chart,
                         title: "Report",
                         subtitle: "Analytics",
@@ -360,6 +361,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   subtitle: "Buy goods from supplier",
                   iconBgColor: const Color(0xFFE1F5FE),
                   iconColor: Colors.blue,
+                  theme: theme,
                   onTap: () {
                     // Navigate to Purchase Screen
                     Navigator.push(
@@ -378,6 +380,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   subtitle: "Sales & Purchase",
                   iconBgColor: const Color.fromARGB(255, 228, 255, 243),
                   iconColor: Colors.green,
+                  theme: theme,
                   onTap: () {
                     // Navigate to Purchase Screen
                     Navigator.push(
@@ -426,13 +429,14 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color iconBgColor,
     required Color iconColor,
     required VoidCallback onTap,
+    required ThemeProvider theme,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: cardColor,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -459,21 +463,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: primaryText,
+                      color: theme.primaryText,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(color: secondaryText, fontSize: 12),
+                    style: TextStyle(color: theme.secondaryText, fontSize: 12),
                   ),
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right, color: secondaryText),
+            Icon(Icons.chevron_right, color: theme.secondaryText),
           ],
         ),
       ),
@@ -487,13 +491,14 @@ class _HomeScreenState extends State<HomeScreen> {
     required Color iconBgColor,
     required Color iconColor,
     required onTap,
+    required ThemeProvider theme,
   }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: cardColor,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
@@ -517,16 +522,16 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
-                color: primaryText,
+                color: theme.primaryText,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               subtitle,
-              style: const TextStyle(color: secondaryText, fontSize: 12),
+              style: TextStyle(color: theme.secondaryText, fontSize: 12),
             ),
           ],
         ),

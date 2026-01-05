@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/shop_setup.dart';
+import 'package:selldroid/theme_provider.dart';
 
 import '../models/preference_model.dart';
 
@@ -18,13 +20,6 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
   bool _isGstEnabled = true; // Main Toggle: GST vs Non-GST
   TaxType _selectedTaxType = TaxType.inclusive; // Inclusive vs Exclusive
   bool _maintainStock = false;
-
-  // Colors
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1); // Cerulean
-  static const Color cardColor = Colors.white;
 
   @override
   void initState() {
@@ -74,24 +69,27 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: theme.bgColor,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: theme.bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
+          icon: Icon(
             Icons.arrow_back_ios_new,
-            color: primaryText,
+            color: theme.primaryText,
             size: 20,
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "GST & Stock Settings",
           style: TextStyle(
-            color: primaryText,
+            color: theme.primaryText,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -104,10 +102,10 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Configure your tax mode (GST/Non-GST) and inventory preferences.",
                 style: TextStyle(
-                  color: secondaryText,
+                  color: theme.secondaryText,
                   height: 1.5,
                   fontSize: 14,
                 ),
@@ -115,12 +113,12 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
               const SizedBox(height: 32),
 
               // --- SECTION 1: GST MODE ---
-              _buildSectionHeader("TAX SETTINGS"),
+              _buildSectionHeader("TAX SETTINGS", theme),
               const SizedBox(height: 12),
 
               Container(
                 decoration: BoxDecoration(
-                  color: cardColor,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
@@ -131,20 +129,20 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
                         horizontal: 20,
                         vertical: 8,
                       ),
-                      activeColor: accentColor,
-                      title: const Text(
+                      activeColor: theme.accentColor,
+                      title: Text(
                         "Enable GST",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: primaryText,
+                          color: theme.primaryText,
                         ),
                       ),
                       subtitle: Text(
                         _isGstEnabled
                             ? "GST Mode Active"
                             : "Non-GST Mode (No Tax)",
-                        style: const TextStyle(
-                          color: secondaryText,
+                        style: TextStyle(
+                          color: theme.secondaryText,
                           fontSize: 13,
                         ),
                       ),
@@ -161,9 +159,11 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
                         title: "Inclusive",
                         subtitle: "Tax included in price",
                         value: TaxType.inclusive,
+                        theme: theme,
                       ),
                       const Divider(height: 1, indent: 16, endIndent: 16),
                       _buildRadioTile(
+                        theme: theme,
                         title: "Exclusive",
                         subtitle: "Tax added on top of price",
                         value: TaxType.exclusive,
@@ -176,12 +176,12 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
               const SizedBox(height: 32),
 
               // --- SECTION 2: INVENTORY ---
-              _buildSectionHeader("INVENTORY MANAGEMENT"),
+              _buildSectionHeader("INVENTORY MANAGEMENT", theme),
               const SizedBox(height: 12),
 
               Container(
                 decoration: BoxDecoration(
-                  color: cardColor,
+                  color: theme.cardColor,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: SwitchListTile(
@@ -189,17 +189,17 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
                     horizontal: 20,
                     vertical: 8,
                   ),
-                  activeColor: accentColor,
-                  title: const Text(
+                  activeColor: theme.accentColor,
+                  title: Text(
                     "Maintain Stock",
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: primaryText,
+                      color: theme.primaryText,
                     ),
                   ),
-                  subtitle: const Text(
+                  subtitle: Text(
                     "Track product quantities",
-                    style: TextStyle(color: secondaryText, fontSize: 13),
+                    style: TextStyle(color: theme.secondaryText, fontSize: 13),
                   ),
                   value: _maintainStock,
                   onChanged: (val) {
@@ -219,9 +219,9 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.info_outline,
-                      color: primaryText,
+                      color: theme.primaryText,
                       size: 24,
                     ),
                     const SizedBox(width: 12),
@@ -231,7 +231,7 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
                             ? "GST bills will be generated."
                             : "Simple estimates (Non-GST) will be generated.",
                         style: TextStyle(
-                          color: primaryText.withOpacity(0.8),
+                          color: theme.primaryText.withOpacity(0.8),
                           fontWeight: FontWeight.w600,
                           fontSize: 13,
                         ),
@@ -250,7 +250,7 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
                 child: ElevatedButton(
                   onPressed: _saveAndContinue,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: accentColor,
+                    backgroundColor: theme.accentColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -274,11 +274,11 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(String title, ThemeProvider theme) {
     return Text(
       title,
-      style: const TextStyle(
-        color: secondaryText,
+      style: TextStyle(
+        color: theme.secondaryText,
         fontWeight: FontWeight.bold,
         fontSize: 12,
         letterSpacing: 1.0,
@@ -290,24 +290,25 @@ class _GstStockSettingsScreenState extends State<GstStockSettingsScreen> {
     required String title,
     required String subtitle,
     required TaxType value,
+    required ThemeProvider theme,
   }) {
     return RadioListTile<TaxType>(
       contentPadding: const EdgeInsets.symmetric(
         horizontal: 10,
         vertical: 0,
       ), // Compact
-      activeColor: accentColor,
+      activeColor: theme.accentColor,
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
-          color: primaryText,
+          color: theme.primaryText,
           fontSize: 15,
         ),
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(color: secondaryText, fontSize: 12),
+        style: TextStyle(color: theme.secondaryText, fontSize: 12),
       ),
       value: value,
       groupValue: _selectedTaxType,

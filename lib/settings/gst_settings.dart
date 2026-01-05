@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/shop_setup.dart'; // Assuming this import exists based on your code
+import 'package:selldroid/theme_provider.dart';
 import '../models/preference_model.dart';
 
 class GstSettingsScreen extends StatefulWidget {
@@ -23,13 +25,6 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
   TaxType? _originalTaxType;
   bool? _originalMaintainStock;
   bool _allowPop = false; // Controls the back button gate
-
-  // Colors
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
 
   @override
   void initState() {
@@ -100,7 +95,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
                 Text("Unsaved Changes"),
               ],
             ),
-            content: const Text(
+            content: Text(
               "You have unsaved settings. Do you want to discard them?",
               style: TextStyle(fontSize: 15, color: primaryText),
             ),
@@ -111,7 +106,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text(
+                child: Text(
                   "Keep Editing",
                   style: TextStyle(color: secondaryText),
                 ),
@@ -162,8 +157,21 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
     }
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+
     // --- NEW: Wrap Scaffold in PopScope ---
     return PopScope(
       canPop: _allowPop,
@@ -177,15 +185,11 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
           backgroundColor: bgColor,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new,
-              color: primaryText,
-              size: 20,
-            ),
+            icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
             // --- NEW: Trigger custom back logic ---
             onPressed: _handlePopRequest,
           ),
-          title: const Text(
+          title: Text(
             "GST Settings",
             style: TextStyle(
               color: primaryText,
@@ -201,7 +205,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   "Configure your tax mode (GST/Non-GST) and inventory preferences.",
                   style: TextStyle(
                     color: secondaryText,
@@ -229,7 +233,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
                           vertical: 8,
                         ),
                         activeColor: accentColor,
-                        title: const Text(
+                        title: Text(
                           "Enable GST",
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
@@ -240,10 +244,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
                           _isGstEnabled
                               ? "GST Mode Active"
                               : "Non-GST Mode (No Tax)",
-                          style: const TextStyle(
-                            color: secondaryText,
-                            fontSize: 13,
-                          ),
+                          style: TextStyle(color: secondaryText, fontSize: 13),
                         ),
                         value: _isGstEnabled,
                         onChanged: (val) {
@@ -286,14 +287,14 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
                       vertical: 8,
                     ),
                     activeColor: accentColor,
-                    title: const Text(
+                    title: Text(
                       "Maintain Stock",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: primaryText,
                       ),
                     ),
-                    subtitle: const Text(
+                    subtitle: Text(
                       "Track product quantities",
                       style: TextStyle(color: secondaryText, fontSize: 13),
                     ),
@@ -371,7 +372,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: const TextStyle(
+      style: TextStyle(
         color: secondaryText,
         fontWeight: FontWeight.bold,
         fontSize: 12,
@@ -390,7 +391,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
       activeColor: accentColor,
       title: Text(
         title,
-        style: const TextStyle(
+        style: TextStyle(
           fontWeight: FontWeight.w600,
           color: primaryText,
           fontSize: 15,
@@ -398,7 +399,7 @@ class _GstSettingsScreenState extends State<GstSettingsScreen> {
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(color: secondaryText, fontSize: 12),
+        style: TextStyle(color: secondaryText, fontSize: 12),
       ),
       value: value,
       groupValue: _selectedTaxType,

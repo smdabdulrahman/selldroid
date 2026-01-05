@@ -1,7 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
+import 'package:selldroid/helpers/functions_helper.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class StockSaleReportScreen extends StatefulWidget {
   const StockSaleReportScreen({super.key});
@@ -11,13 +14,6 @@ class StockSaleReportScreen extends StatefulWidget {
 }
 
 class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
-  // --- Style Constants ---
-  static const Color bgColor = Color(0xFFF8F9FA);
-  static const Color primaryText = Color(0xFF212121);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF00796B); // Teal
-  static const Color cardColor = Colors.white;
-
   // --- State Variables ---
   int _selectedTab = 0; // 0: Daily, 1: Weekly, 2: Monthly
   bool _isLoading = true;
@@ -269,7 +265,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: accentColor,
-            colorScheme: const ColorScheme.light(primary: accentColor),
+            colorScheme: ColorScheme.light(primary: accentColor),
             buttonTheme: const ButtonThemeData(
               textTheme: ButtonTextTheme.primary,
             ),
@@ -316,10 +312,12 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                         item['item_name'],
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      subtitle: Text("Sold: ${item['sold']}"),
+                      subtitle: Text(
+                        "Sold: ${FunctionsHelper.format_int(item['sold'])}",
+                      ),
                       trailing: Text(
-                        "₹${item['revenue']}",
-                        style: const TextStyle(
+                        "₹${FunctionsHelper.format_int(item['revenue'])}",
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: accentColor,
                         ),
@@ -335,19 +333,31 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
     );
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryText),
+          icon: Icon(Icons.arrow_back, color: primaryText),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Stock Sale Analytics",
           style: TextStyle(
             color: primaryText,
@@ -366,15 +376,15 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_customDateRange != null)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.only(bottom: 10),
                       child: Chip(
                         label: Text(
                           "${DateFormat('dd MMM').format(_customDateRange!.start)} - ${DateFormat('dd MMM').format(_customDateRange!.end)}",
@@ -391,7 +401,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
 
                   // 1. TABS
                   _buildTabs(),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 2. METRIC CARDS
                   Row(
@@ -399,29 +409,31 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                       Expanded(
                         child: _buildMetricCard(
                           title: "REVENUE",
-                          value: "₹${_totalRevenue.toStringAsFixed(0)}",
+                          value:
+                              "₹${FunctionsHelper.format_double(_totalRevenue.toStringAsFixed(0))}",
                           icon: Icons.attach_money,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       Expanded(
                         child: _buildMetricCard(
                           title: "ITEMS SOLD",
-                          value: "$_totalItemsSold",
+                          value:
+                              "${FunctionsHelper.format_int(_totalItemsSold)}",
                           icon: Icons.inventory_2,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 3. CHART
                   _buildChartCard(),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 4. TOP SELLING ITEMS
                   _buildTopItemsList(),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 5. RECENT TRANSACTIONS
                   _buildRecentTransactions(),
@@ -448,7 +460,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
             _loadData();
           },
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             decoration: BoxDecoration(
               color: isActive ? accentColor : Colors.white,
               borderRadius: BorderRadius.circular(20),
@@ -474,7 +486,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -482,7 +494,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -492,10 +504,10 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
           Row(
             children: [
               Icon(icon, size: 18, color: secondaryText),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
                   color: secondaryText,
@@ -503,11 +515,11 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 24,
+            style: TextStyle(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: primaryText,
             ),
@@ -524,7 +536,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
     if (_customDateRange != null) periodText = "Custom Range";
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -538,7 +550,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "Sales Trend",
                 style: TextStyle(
                   fontSize: 16,
@@ -548,16 +560,16 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
               ),
               Text(
                 periodText,
-                style: const TextStyle(fontSize: 12, color: secondaryText),
+                style: TextStyle(fontSize: 12, color: secondaryText),
               ),
             ],
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           AspectRatio(
             aspectRatio: 1.70,
             child: LineChart(
               LineChartData(
-                gridData: const FlGridData(show: false),
+                gridData: FlGridData(show: false),
                 titlesData: FlTitlesData(
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -569,23 +581,23 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                         if (idx >= 0 && idx < _chartBottomTitles.length) {
                           return Text(
                             _chartBottomTitles[idx],
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: secondaryText,
                               fontSize: 10,
                             ),
                           );
                         }
-                        return const Text("");
+                        return Text("");
                       },
                     ),
                   ),
-                  leftTitles: const AxisTitles(
+                  leftTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
-                  topTitles: const AxisTitles(
+                  topTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
-                  rightTitles: const AxisTitles(
+                  rightTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
                 ),
@@ -601,7 +613,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                     color: accentColor,
                     barWidth: 3,
                     isStrokeCapRound: true,
-                    dotData: const FlDotData(show: true),
+                    dotData: FlDotData(show: true),
                     belowBarData: BarAreaData(
                       show: true,
                       color: accentColor.withOpacity(0.1),
@@ -618,7 +630,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
 
   Widget _buildTopItemsList() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -629,7 +641,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "Top Selling Items",
                 style: TextStyle(
                   fontSize: 16,
@@ -639,7 +651,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
               ),
               TextButton(
                 onPressed: _showAllTopItems,
-                child: const Text(
+                child: Text(
                   "View All",
                   style: TextStyle(
                     fontSize: 12,
@@ -650,9 +662,9 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _topItems.isEmpty
-              ? const Text(
+              ? Text(
                   "No items sold yet",
                   style: TextStyle(color: secondaryText),
                 )
@@ -663,7 +675,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                     double progress = maxRev > 0 ? revenue / maxRev : 0;
 
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
+                      padding: EdgeInsets.only(bottom: 16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -672,29 +684,29 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                             children: [
                               Text(
                                 item['item_name'],
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
-                                "₹${revenue.toStringAsFixed(0)}",
-                                style: const TextStyle(
+                                "₹${FunctionsHelper.format_double(revenue.toStringAsFixed(0))}",
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: accentColor,
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Text(
-                            "${item['sold']} units sold",
-                            style: const TextStyle(
+                            "${FunctionsHelper.format_int(item['sold'])} units sold",
+                            style: TextStyle(
                               fontSize: 12,
                               color: secondaryText,
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 8),
                           // FIX: Progress Bar Overflow
                           ClipRRect(
                             borderRadius: BorderRadius.circular(3),
@@ -729,7 +741,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
 
   Widget _buildRecentTransactions() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -737,7 +749,7 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Recent Transactions",
             style: TextStyle(
               fontSize: 16,
@@ -745,17 +757,17 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
               color: primaryText,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _recentTransactions.isEmpty
-              ? const Text(
+              ? Text(
                   "No transactions yet",
                   style: TextStyle(color: secondaryText),
                 )
               : ListView.separated(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: _recentTransactions.length,
-                  separatorBuilder: (ctx, i) => const Divider(height: 20),
+                  separatorBuilder: (ctx, i) => Divider(height: 20),
                   itemBuilder: (context, index) {
                     final sale = _recentTransactions[index];
                     String dateStr = DateFormat(
@@ -766,27 +778,27 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                         CircleAvatar(
                           backgroundColor: bgColor,
                           radius: 20,
-                          child: const Icon(
+                          child: Icon(
                             Icons.receipt,
                             size: 18,
                             color: secondaryText,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 sale['cust_name'] ?? "Unknown",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
                                 "Bill #S${sale['id']} • $dateStr",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: secondaryText,
                                 ),
@@ -795,8 +807,8 @@ class _StockSaleReportScreenState extends State<StockSaleReportScreen> {
                           ),
                         ),
                         Text(
-                          "+ ₹${sale['final_amount']}",
-                          style: const TextStyle(
+                          "+ ₹${FunctionsHelper.format_int(sale['final_amount'])}",
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.green,
                           ),

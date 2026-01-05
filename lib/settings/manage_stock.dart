@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/models/stock_item.dart';
+import 'package:selldroid/theme_provider.dart';
 
 import 'package:selldroid/settings/addstockitem.dart'; // Adjust path if needed
 
@@ -13,13 +15,6 @@ class ManageStockScreen extends StatefulWidget {
 }
 
 class _ManageStockScreenState extends State<ManageStockScreen> {
-  // Colors (Matching your AddStockScreen)
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color cardColor = Colors.white;
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color inputFill = Color(0xFFF3F4F6);
-
   // Data State
   List<StockItem> _allStock = [];
   List<StockItem> _filteredStock = [];
@@ -86,27 +81,34 @@ class _ManageStockScreenState extends State<ManageStockScreen> {
     // We await the result. When user comes back, we refresh the list.
     await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AddStockScreen()),
+      MaterialPageRoute(builder: (context) => AddStockScreen()),
     );
     _fetchStockList();
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color accentColor;
+  late Color cardColor;
+  late Color secondaryText;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: primaryText,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Inventory",
           style: TextStyle(
             color: primaryText,
@@ -237,7 +239,7 @@ class _ManageStockScreenState extends State<ManageStockScreen> {
                 // Page Indicator
                 Text(
                   "Page ${_currentPage + 1} of ${_totalPages == 0 ? 1 : _totalPages}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: primaryText,
                     fontSize: 12,
@@ -298,7 +300,7 @@ class _ManageStockScreenState extends State<ManageStockScreen> {
                   item.itemName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                     color: primaryText,
@@ -341,7 +343,7 @@ class _ManageStockScreenState extends State<ManageStockScreen> {
             child: Text(
               item.sellingPrice.toString(),
               textAlign: TextAlign.right,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
                 color: primaryText,

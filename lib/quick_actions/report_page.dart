@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/quick_actions/make_bill/all_bills_view.dart';
 import 'package:selldroid/quick_actions/make_bill/customer_report.dart';
 import 'package:selldroid/quick_actions/purchase_history.dart';
@@ -7,34 +8,47 @@ import 'package:selldroid/quick_actions/reports/overall_report.dart';
 import 'package:selldroid/quick_actions/reports/quick_sale_report.dart';
 import 'package:selldroid/quick_actions/reports/stock_report.dart';
 import 'package:selldroid/quick_actions/reports/supplier_report.dart';
+import 'package:selldroid/theme_provider.dart';
 
 // import 'package:selldroid/customer_report.dart'; // Uncomment when ready to link real pages
 // import 'package:selldroid/expense_screen.dart';
 
-class ReportHubScreen extends StatelessWidget {
+class ReportHubScreen extends StatefulWidget {
   const ReportHubScreen({super.key});
 
-  // Colors extracted from the design
-  static const Color bgColor = Color(0xFFF8F9FA); // Very light grey background
-  static const Color primaryText = Color(0xFF212121);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color cardColor = Colors.white;
-  static const Color iconBgColor = Color(0xFFE0F2F1); // Light Teal/Cyan
-  static const Color iconColor = Color(0xFF00796B); // Darker Teal
+  @override
+  State<ReportHubScreen> createState() => _ReportHubScreenState();
+}
 
+late Color bgColor;
+late Color primaryText;
+late Color secondaryText;
+late Color cardColor;
+late Color iconBgColor;
+late Color iconColor;
+
+class _ReportHubScreenState extends State<ReportHubScreen> {
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    cardColor = theme.cardColor;
+    iconBgColor = const Color(0xFFE0F2F1); // Light Teal/Cyan
+    iconColor = theme.accentColor;
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryText),
+          icon: Icon(Icons.arrow_back, color: primaryText),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Reports",
           style: TextStyle(
             color: primaryText,
@@ -49,7 +63,7 @@ class ReportHubScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // --- HEADER SECTION ---
-            const Text(
+            Text(
               "Overview",
               style: TextStyle(
                 fontSize: 18,
@@ -58,7 +72,7 @@ class ReportHubScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
+            Text(
               "Select a category to view details",
               style: TextStyle(fontSize: 14, color: secondaryText),
             ),
@@ -263,7 +277,7 @@ class ReportHubScreen extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: primaryText,
@@ -272,7 +286,7 @@ class ReportHubScreen extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: secondaryText,
                           height: 1.2, // Better line spacing

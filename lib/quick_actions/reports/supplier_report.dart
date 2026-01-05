@@ -1,7 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
+import 'package:selldroid/helpers/functions_helper.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class SupplierReportScreen extends StatefulWidget {
   const SupplierReportScreen({super.key});
@@ -11,33 +14,6 @@ class SupplierReportScreen extends StatefulWidget {
 }
 
 class _SupplierReportScreenState extends State<SupplierReportScreen> {
-  // --- CUSTOM COLOR THEME ---
-  static const Color bgColor = Color.fromARGB(
-    255,
-    240,
-    240,
-    242,
-  ); // 220, 220, 221
-  static const Color primaryText = Color.fromARGB(
-    255,
-    70,
-    73,
-    76,
-  ); // 70, 73, 76
-  static const Color secondaryText = Color.fromARGB(
-    255,
-    76,
-    92,
-    104,
-  ); // 76, 92, 104
-  static const Color accentColor = Color.fromARGB(
-    255,
-    25,
-    133,
-    161,
-  ); // 25, 133, 161
-  static const Color cardColor = Colors.white;
-
   // --- State Variables ---
   int _selectedTab = 0; // 0: Daily, 1: Weekly, 2: Monthly
   bool _isLoading = true;
@@ -251,7 +227,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
       builder: (ctx, child) => Theme(
         data: ThemeData.light().copyWith(
           primaryColor: accentColor,
-          colorScheme: const ColorScheme.light(primary: accentColor),
+          colorScheme: ColorScheme.light(primary: accentColor),
         ),
         child: child!,
       ),
@@ -265,23 +241,31 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
     }
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
         backgroundColor: bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: primaryText,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Purchase Reports",
           style: TextStyle(
             color: primaryText,
@@ -300,22 +284,22 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
+              padding: EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_customDateRange != null)
                     Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding: EdgeInsets.only(bottom: 10),
                       child: Chip(
                         label: Text(
                           "${DateFormat('dd MMM').format(_customDateRange!.start)} - ${DateFormat('dd MMM').format(_customDateRange!.end)}",
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white),
                         ),
                         backgroundColor: accentColor,
-                        deleteIcon: const Icon(
+                        deleteIcon: Icon(
                           Icons.close,
                           size: 18,
                           color: Colors.white,
@@ -332,7 +316,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
 
                   // 1. TABS
                   _buildTabs(),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 2. METRICS
                   Row(
@@ -340,29 +324,31 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                       Expanded(
                         child: _buildMetricCard(
                           title: "TOTAL EXPENSE",
-                          value: "₹${_totalExpenses.toStringAsFixed(0)}",
+                          value:
+                              "₹${FunctionsHelper.format_double(_totalExpenses.toStringAsFixed(0))}",
                           icon: Icons.outbond,
                         ),
                       ),
-                      const SizedBox(width: 16),
+                      SizedBox(width: 16),
                       Expanded(
                         child: _buildMetricCard(
                           title: "UNITS BOUGHT",
-                          value: "$_totalItemsPurchased",
+                          value:
+                              "${FunctionsHelper.format_int(_totalItemsPurchased)}",
                           icon: Icons.layers,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 3. CHART
                   _buildChartCard(),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 4. TOP SUPPLIERS
                   _buildTopSuppliersList(),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 20),
 
                   // 5. RECENT LIST
                   _buildRecentPurchases(),
@@ -395,7 +381,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                 _loadData();
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                padding: EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
                   color: isActive ? accentColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(11),
@@ -423,7 +409,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
     required IconData icon,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -431,7 +417,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
           BoxShadow(
             color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
-            offset: const Offset(0, 4),
+            offset: Offset(0, 4),
           ),
         ],
       ),
@@ -441,10 +427,10 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
           Row(
             children: [
               Icon(icon, size: 18, color: secondaryText),
-              const SizedBox(width: 8),
+              SizedBox(width: 8),
               Text(
                 title,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                   color: secondaryText,
@@ -452,13 +438,13 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 22,
+            style: TextStyle(
+              fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: primaryText,
+              color: Colors.black,
             ),
           ),
         ],
@@ -468,7 +454,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
 
   Widget _buildChartCard() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -479,7 +465,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Expenses Trend",
             style: TextStyle(
               fontSize: 16,
@@ -487,12 +473,12 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
               color: primaryText,
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 24),
           AspectRatio(
             aspectRatio: 1.70,
             child: LineChart(
               LineChartData(
-                gridData: const FlGridData(show: false),
+                gridData: FlGridData(show: false),
                 titlesData: FlTitlesData(
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -506,22 +492,22 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                             _chartBottomTitles[idx].isNotEmpty)
                           return Text(
                             _chartBottomTitles[idx],
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: secondaryText,
                               fontSize: 10,
                             ),
                           );
-                        return const Text("");
+                        return Text("");
                       },
                     ),
                   ),
-                  leftTitles: const AxisTitles(
+                  leftTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
-                  topTitles: const AxisTitles(
+                  topTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
-                  rightTitles: const AxisTitles(
+                  rightTitles: AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
                 ),
@@ -537,7 +523,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                     color: accentColor,
                     barWidth: 3,
                     isStrokeCapRound: true,
-                    dotData: const FlDotData(show: true),
+                    dotData: FlDotData(show: true),
                     belowBarData: BarAreaData(
                       show: true,
                       color: accentColor.withOpacity(0.1),
@@ -554,7 +540,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
 
   Widget _buildTopSuppliersList() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -562,7 +548,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Top Suppliers",
             style: TextStyle(
               fontSize: 16,
@@ -570,9 +556,9 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
               color: primaryText,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _topSuppliers.isEmpty
-              ? const Text(
+              ? Text(
                   "No purchase data yet",
                   style: TextStyle(color: secondaryText),
                 )
@@ -580,7 +566,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                   children: _topSuppliers.map((item) {
                     double total = (item['total_spent'] as num).toDouble();
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
+                      padding: EdgeInsets.only(bottom: 16),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -589,16 +575,16 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                             children: [
                               Text(
                                 item['name'],
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                   color: primaryText,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 4),
                               Text(
                                 "${item['bill_count']} Bills",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: secondaryText,
                                 ),
@@ -606,8 +592,8 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                             ],
                           ),
                           Text(
-                            "₹${total.toStringAsFixed(0)}",
-                            style: const TextStyle(
+                            "₹${FunctionsHelper.format_double(total.toStringAsFixed(0))}",
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: accentColor,
                             ),
@@ -624,7 +610,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
 
   Widget _buildRecentPurchases() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(16),
@@ -632,7 +618,7 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Recent Purchases",
             style: TextStyle(
               fontSize: 16,
@@ -640,17 +626,17 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
               color: primaryText,
             ),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           _recentPurchases.isEmpty
-              ? const Text(
+              ? Text(
                   "No recent purchases",
                   style: TextStyle(color: secondaryText),
                 )
               : ListView.separated(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: NeverScrollableScrollPhysics(),
                   itemCount: _recentPurchases.length,
-                  separatorBuilder: (ctx, i) => const Divider(height: 20),
+                  separatorBuilder: (ctx, i) => Divider(height: 20),
                   itemBuilder: (context, index) {
                     final purchase = _recentPurchases[index];
                     return Row(
@@ -658,27 +644,27 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                         CircleAvatar(
                           backgroundColor: bgColor,
                           radius: 20,
-                          child: const Icon(
+                          child: Icon(
                             Icons.shopping_bag_outlined,
                             size: 18,
                             color: secondaryText,
                           ),
                         ),
-                        const SizedBox(width: 12),
+                        SizedBox(width: 12),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 purchase['supplier_name'] ?? "Unknown",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 14,
                                 ),
                               ),
                               Text(
                                 "Bill #${purchase['id']} • ${DateFormat('dd MMM').format(DateTime.parse(purchase['purchased_date']))}",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: secondaryText,
                                 ),
@@ -687,8 +673,8 @@ class _SupplierReportScreenState extends State<SupplierReportScreen> {
                           ),
                         ),
                         Text(
-                          "- ₹${purchase['final_amount']}",
-                          style: const TextStyle(
+                          "- ₹${FunctionsHelper.format_int(purchase['final_amount'])}",
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.redAccent,
                           ),

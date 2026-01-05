@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/helpers/functions_helper.dart';
 import 'package:selldroid/models/general_models.dart';
-import 'package:selldroid/show_dialog_boxes.dart'; // Ensure this path is correct for your Expense model
+import 'package:selldroid/show_dialog_boxes.dart';
+import 'package:selldroid/theme_provider.dart'; // Ensure this path is correct for your Expense model
 
 // --- YOUR EXPENSE MODEL (Pasted here for reference, or import it) ---
 
@@ -17,14 +19,6 @@ class ExpenseScreen extends StatefulWidget {
 }
 
 class _ExpenseScreenState extends State<ExpenseScreen> {
-  // --- Colors ---
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color inputFill = Color(0xFFF3F4F6);
-
   // --- Controllers ---
   final TextEditingController _amountCtrl = TextEditingController();
   final TextEditingController _descCtrl = TextEditingController();
@@ -121,7 +115,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: accentColor,
-            colorScheme: const ColorScheme.light(primary: accentColor),
+            colorScheme: ColorScheme.light(primary: accentColor),
             buttonTheme: const ButtonThemeData(
               textTheme: ButtonTextTheme.primary,
             ),
@@ -137,11 +131,23 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
     }
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+  late Color inputFill;
   @override
   Widget build(BuildContext context) {
     // UPDATED: Calculations using int
     int totalExpense = _expenses.fold(0, (sum, item) => sum + item.amount);
-
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+    inputFill = const Color(0xFFF3F4F6);
     DateTime now = DateTime.now();
     int monthlyExpense = _expenses
         .where((e) {
@@ -157,14 +163,14 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Expenses",
           style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
         ),
         backgroundColor: bgColor,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: primaryText),
+        iconTheme: IconThemeData(color: primaryText),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -204,7 +210,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Add New Expense",
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
@@ -269,7 +275,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                             alignment: Alignment.center,
                             child: Text(
                               DateFormat('dd MMM').format(_selectedDate),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: accentColor,
                               ),
@@ -288,7 +294,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                         flex: 3,
                         child: TextField(
                           controller: _descCtrl,
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: "Description (Optional)",
                             filled: true,
                             fillColor: inputFill,
@@ -311,7 +317,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                           controller: _amountCtrl,
                           keyboardType: TextInputType.number,
                           style: const TextStyle(fontWeight: FontWeight.bold),
-                          decoration: const InputDecoration(
+                          decoration: InputDecoration(
                             hintText: "₹ 0",
                             filled: true,
                             fillColor: inputFill,
@@ -359,7 +365,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
             const SizedBox(height: 20),
 
             // --- 3. RECENT LIST HEADER ---
-            const Padding(
+            Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Align(
                 alignment: Alignment.centerLeft,
@@ -382,7 +388,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                     child: CircularProgressIndicator(),
                   )
                 : _expenses.isEmpty
-                ? const Padding(
+                ? Padding(
                     padding: EdgeInsets.all(40),
                     child: Text(
                       "No expenses yet",
@@ -443,7 +449,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                                   children: [
                                     Text(
                                       item.category,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
                                         color: primaryText,
@@ -454,7 +460,7 @@ class _ExpenseScreenState extends State<ExpenseScreen> {
                                       item.description,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         color: secondaryText,
                                       ),

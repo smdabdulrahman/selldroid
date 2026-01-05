@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
+import 'package:selldroid/helpers/functions_helper.dart';
 import 'package:selldroid/models/general_models.dart';
+import 'package:selldroid/theme_provider.dart';
 
 // Model to hold report data
 class CustomerReportItem {
@@ -28,13 +31,6 @@ class CustomerReportScreen extends StatefulWidget {
 }
 
 class _CustomerReportScreenState extends State<CustomerReportScreen> {
-  // --- Colors ---
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color inputFill = Color(0xFFF3F4F6);
   bool _isLoading = true;
   List<CustomerReportItem> _allReports = [];
   List<CustomerReportItem> _filteredReports = [];
@@ -134,7 +130,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
         return Theme(
           data: ThemeData.light().copyWith(
             primaryColor: accentColor,
-            colorScheme: const ColorScheme.light(primary: accentColor),
+            colorScheme: ColorScheme.light(primary: accentColor),
             buttonTheme: const ButtonThemeData(
               textTheme: ButtonTextTheme.primary,
             ),
@@ -178,21 +174,24 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
         return AlertDialog(
           title: Text(
             "Update Bill $billNo",
-            style: const TextStyle(color: primaryText),
+            style: TextStyle(color: primaryText),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDialogRow("Total Bill:", "₹${billAmt.toStringAsFixed(0)}"),
+              _buildDialogRow(
+                "Total Bill:",
+                "₹${FunctionsHelper.format_double(billAmt.toStringAsFixed(0))}",
+              ),
               _buildDialogRow(
                 "Already Paid:",
-                "₹${alreadyPaid.toStringAsFixed(0)}",
+                "₹${FunctionsHelper.format_double(alreadyPaid.toStringAsFixed(0))}",
               ),
               const Divider(),
               _buildDialogRow(
                 "Pending Due:",
-                "₹${pending.toStringAsFixed(0)}",
+                "₹${FunctionsHelper.format_double(pending.toStringAsFixed(0))}",
                 isBold: true,
                 color: accentColor,
               ),
@@ -201,8 +200,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                 controller: amountCtrl,
                 keyboardType: TextInputType.number,
                 autofocus: true,
-                style: const TextStyle(color: primaryText),
-                decoration: const InputDecoration(
+                style: TextStyle(color: primaryText),
+                decoration: InputDecoration(
                   labelText: "Enter Amount Paying Now",
                   border: OutlineInputBorder(),
                   prefixIcon: Icon(Icons.currency_rupee, color: secondaryText),
@@ -213,10 +212,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text(
-                "Cancel",
-                style: TextStyle(color: secondaryText),
-              ),
+              child: Text("Cancel", style: TextStyle(color: secondaryText)),
             ),
             ElevatedButton(
               onPressed: () async {
@@ -271,7 +267,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: secondaryText)),
+          Text(label, style: TextStyle(color: secondaryText)),
           Text(
             value,
             style: TextStyle(
@@ -284,8 +280,21 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
     );
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+  final inputFill = Colors.grey.shade100;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
+
     // Calculate Grand Totals
     double totalPaidAll = 0;
     double totalUnpaidAll = 0;
@@ -295,16 +304,19 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
     }
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: theme.bgColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Customer Report",
-          style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: theme.primaryText,
+            fontWeight: FontWeight.bold,
+          ),
         ),
-        backgroundColor: bgColor,
+        backgroundColor: theme.bgColor,
         elevation: 0,
         centerTitle: true,
-        iconTheme: const IconThemeData(color: primaryText),
+        iconTheme: IconThemeData(color: theme.primaryText),
         actions: [
           IconButton(
             icon: Icon(
@@ -325,11 +337,11 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
             child: TextField(
               controller: _searchCtrl,
               onChanged: _filterData,
-              style: const TextStyle(color: primaryText),
+              style: TextStyle(color: primaryText),
               decoration: InputDecoration(
                 hintText: "Search Customer...",
-                hintStyle: const TextStyle(color: secondaryText),
-                prefixIcon: const Icon(Icons.search, color: secondaryText),
+                hintStyle: TextStyle(color: secondaryText),
+                prefixIcon: Icon(Icons.search, color: secondaryText),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(vertical: 0),
@@ -360,7 +372,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
               padding: const EdgeInsets.only(bottom: 8),
               child: Text(
                 "Showing: ${DateFormat('dd MMM').format(_dateRange!.start)} - ${DateFormat('dd MMM').format(_dateRange!.end)}",
-                style: const TextStyle(fontSize: 12, color: secondaryText),
+                style: TextStyle(fontSize: 12, color: secondaryText),
               ),
             ),
 
@@ -369,7 +381,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredReports.isEmpty
-                ? const Center(
+                ? Center(
                     child: Text(
                       "No records found",
                       style: TextStyle(color: secondaryText),
@@ -402,7 +414,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: secondaryText,
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -410,8 +422,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
           ),
           const SizedBox(height: 4),
           Text(
-            "₹${amount.toStringAsFixed(2)}",
-            style: const TextStyle(
+            "₹${FunctionsHelper.format_double(amount.toStringAsFixed(2))}",
+            style: TextStyle(
               color: primaryText,
               fontWeight: FontWeight.bold,
               fontSize: 18,
@@ -438,22 +450,16 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
               item.customer.name.isNotEmpty
                   ? item.customer.name[0].toUpperCase()
                   : "?",
-              style: const TextStyle(
-                color: primaryText,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
             ),
           ),
           title: Text(
             item.customer.name,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              color: primaryText,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: primaryText),
           ),
           subtitle: Text(
             "Phone: ${item.customer.phoneNumber}",
-            style: const TextStyle(fontSize: 12, color: secondaryText),
+            style: TextStyle(fontSize: 12, color: secondaryText),
           ),
 
           // --- TRAILING: DUE/PAID + EXPAND ICON ---
@@ -465,21 +471,21 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    "Due: ₹${item.totalUnpaid.toStringAsFixed(0)}",
-                    style: const TextStyle(
+                    "Due: ₹${FunctionsHelper.format_double(item.totalUnpaid.toStringAsFixed(0))}",
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: accentColor, // Use Accent Color instead of Red
                       fontSize: 14,
                     ),
                   ),
                   Text(
-                    "Paid: ₹${item.totalPaid.toStringAsFixed(0)}",
-                    style: const TextStyle(fontSize: 10, color: secondaryText),
+                    "Paid: ₹${FunctionsHelper.format_double(item.totalPaid.toStringAsFixed(0))}",
+                    style: TextStyle(fontSize: 10, color: secondaryText),
                   ),
                 ],
               ),
               const SizedBox(width: 8),
-              const Icon(
+              Icon(
                 Icons.keyboard_arrow_down,
                 color: secondaryText,
               ), // Visual indicator for expansion
@@ -491,7 +497,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Column(
                 children: [
-                  const Row(
+                  Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Expanded(
@@ -576,7 +582,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                                 children: [
                                   Text(
                                     billNo,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
                                       color: primaryText,
@@ -585,7 +591,7 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                                   if (dateStr.isNotEmpty)
                                     Text(
                                       dateStr,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 10,
                                         color: secondaryText,
                                       ),
@@ -596,8 +602,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
 
                             Expanded(
                               child: Text(
-                                "₹${bill.toStringAsFixed(0)}",
-                                style: const TextStyle(
+                                "₹${FunctionsHelper.format_double(bill.toStringAsFixed(0))}",
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: primaryText,
                                 ),
@@ -605,8 +611,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                             ),
                             Expanded(
                               child: Text(
-                                "₹${paid.toStringAsFixed(0)}",
-                                style: const TextStyle(
+                                "₹${FunctionsHelper.format_double(paid.toStringAsFixed(0))}",
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: primaryText,
                                 ),
@@ -614,8 +620,8 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                             ),
                             Expanded(
                               child: Text(
-                                "₹${due.toStringAsFixed(0)}",
-                                style: const TextStyle(
+                                "₹${FunctionsHelper.format_double(due.toStringAsFixed(0))}",
+                                style: TextStyle(
                                   fontSize: 13,
                                   color: accentColor,
                                 ),
@@ -623,13 +629,13 @@ class _CustomerReportScreenState extends State<CustomerReportScreen> {
                             ), // Accent color for Due
 
                             if (canPay)
-                              const Icon(
+                              Icon(
                                 Icons.edit_note,
                                 size: 20,
                                 color: accentColor,
                               )
                             else
-                              const Icon(
+                              Icon(
                                 Icons.check_circle,
                                 size: 20,
                                 color: secondaryText,

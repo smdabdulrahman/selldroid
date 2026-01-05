@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/gst_stock_settings.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/home.dart';
 import 'package:selldroid/models/shop.dart';
 import 'package:selldroid/welcome_screen.dart';
+import 'package:selldroid/theme_provider.dart';
 
 // Import your destination screens
 
@@ -81,16 +83,15 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+
     // Colors from your palette
-    const Color bgColor = Color(0xFFE8ECEF);
-    const Color titleColor = Color(0xFF46494C);
-    const Color accentColor = Color(0xFF2585A1); // Cerulean Teal
     const Color trackColor = Color(
       0xFFD1D9DE,
     ); // Slightly darker grey for track
 
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: theme.bgColor,
       body: SizedBox(
         width: double.infinity,
         child: Column(
@@ -98,12 +99,12 @@ class _SplashScreenState extends State<SplashScreen>
           children: [
             const Spacer(), // Pushes content to visual center
             // 1. Title Text
-            const Text(
+            Text(
               "SellDroid",
               style: TextStyle(
                 fontSize: 36,
                 fontWeight: FontWeight.bold, // Thick, bold font
-                color: titleColor,
+                color: theme.primaryText,
                 letterSpacing: -0.5,
               ),
             ),
@@ -122,8 +123,8 @@ class _SplashScreenState extends State<SplashScreen>
                     child: LinearProgressIndicator(
                       value: _animation.value, // Connects to controller
                       backgroundColor: trackColor,
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        accentColor,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        theme.accentColor,
                       ),
                     ),
                   );

@@ -1,12 +1,11 @@
 import 'dart:io';
 
-import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
-import 'package:selldroid/PdfHelper.dart';
+import 'package:provider/provider.dart';
+import 'package:selldroid/helpers/PdfHelper.dart';
 import 'package:selldroid/helpers/database_helper.dart';
-import 'package:selldroid/helpers/file_helper.dart';
 import 'package:selldroid/helpers/functions_helper.dart';
 import 'package:selldroid/helpers/print_helper.dart';
 import 'package:selldroid/models/general_models.dart';
@@ -14,10 +13,11 @@ import 'package:selldroid/models/sale.dart';
 import 'package:selldroid/models/shop.dart';
 import 'package:selldroid/models/sold_item.dart';
 import 'package:selldroid/settings/configure.dart';
+import 'package:selldroid/theme_provider.dart'; // Ensure this is imported
 import 'package:share_plus/share_plus.dart';
 
 class BillDetailsScreen extends StatefulWidget {
-  final Map<String, dynamic> saleData; // Passed from the list screen
+  final Map<String, dynamic> saleData;
 
   const BillDetailsScreen({super.key, required this.saleData});
 
@@ -26,11 +26,6 @@ class BillDetailsScreen extends StatefulWidget {
 }
 
 class _BillDetailsScreenState extends State<BillDetailsScreen> {
-  // --- Theme Colors ---
-  final Color colBackground = const Color(0xFFEFF2F5);
-  final Color colPrimary = const Color(0xFF127D95);
-  final Color colTextDark = const Color(0xFF2D3436);
-  final Color colTextLight = const Color(0xFF636E72);
   String bill_path = "";
   List<SoldItem> _items = [];
   ShopDetails? _shop;
@@ -50,10 +45,11 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
     // 1. Load Items
     final items = await DatabaseHelper.instance.getItemsForSale(saleId);
 
-    // 2. Load Shop Details (For State)
+    // 2. Load Shop Details
     final shop = await DatabaseHelper.instance.getShopDetails();
     final prefs = await DatabaseHelper.instance.getPreferences();
-    // 3. Load Customer Details (For State)
+
+    // 3. Load Customer Details
     Customer? cust;
     if (custId != null) {
       final db = await DatabaseHelper.instance.database;
@@ -93,10 +89,10 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
         shop: _shop!,
         sale: saleObj,
         items: _items,
-        customerName: _customer!.name,
-        customerPhone: _customer!.phoneNumber,
-        customerPlace: _customer!.state,
-        customerState: _customer!.state,
+        customerName: _customer?.name ?? "Walk-in Customer",
+        customerPhone: _customer?.phoneNumber ?? "",
+        customerPlace: _customer?.state ?? "",
+        customerState: _customer?.state ?? "",
         prefs: prefs,
       );
 
@@ -106,17 +102,11 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
     }
   }
 
-  // --- Logic to check Tax Type ---
   bool _isInterState() {
     String shopState = (_shop?.state ?? "").trim().toLowerCase();
-
-    // If no customer (Walk-in) or customer has no state, assume Local (Shop State)
     String custState = (_customer?.state ?? shopState).trim().toLowerCase();
     if (custState.isEmpty) custState = shopState;
-
-    // Safety check
     if (shopState.isEmpty) return false;
-
     return shopState != custState;
   }
 
@@ -124,7 +114,7 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
     HapticFeedback.heavyImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(txt, style: TextStyle(color: Colors.white)),
+        content: Text(txt, style: const TextStyle(color: Colors.white)),
         action: SnackBarAction(label: "OK", onPressed: () {}),
         backgroundColor: Colors.red[800],
       ),
@@ -136,32 +126,30 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
       showErrorSnackBar("Select Your Printer in Settings", context);
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) {
-            return ConfigurePage();
-          },
-        ),
+        MaterialPageRoute(builder: (context) => const ConfigurePage()),
       );
+      return;
     }
     PrintHelper.print80mmBill(
       File(bill_path),
       (await DatabaseHelper.instance.getPrinter())!.name,
       context,
     );
-    // 1. Reconstruct Sale Object
-
-    // 2. Generate PDF (Uncomment when you integrate PDF logic)
-    /* await PdfGenerator.printBill(
-      shop: _shop!,
-      sale: saleObj,
-      items: _items,
-      customerName: _customer?.name ?? "Walk-in Customer",
-      customerState: _customer?.state ?? _shop!.state, 
-    ); */
   }
 
   @override
   Widget build(BuildContext context) {
+    // 1. WATCH THEME PROVIDER
+    final theme = context.watch<ThemeProvider>();
+
+    // 2. MAP LOCAL VARIABLES TO THEME FOR CLEANER CODE
+    final Color colTextDark = theme.primaryText;
+    final Color colTextLight = theme.secondaryText;
+    final Color colPrimary = theme.accentColor;
+    final Color colCard = theme.cardColor;
+    // We use theme.bgColor for scaffold, but need a slight contrast for inputs/boxes inside cards
+    final Color colBoxFill = theme.bgColor;
+
     // Data Extraction
     final sale = widget.saleData;
 
@@ -180,28 +168,42 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
     bool isInterState = _isInterState();
 
     return Scaffold(
-      backgroundColor: colBackground,
+      backgroundColor: theme.bgColor, // Dynamic Background
       appBar: AppBar(
-        backgroundColor: colBackground,
+        backgroundColor: theme.bgColor, // Dynamic Background
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: colTextDark),
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: theme.primaryText,
+            size: 20,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          "Bill ${sale['isStockSales'] == 1 ? "S" : "Q" + "" + sale['id'].toString()}",
-          style: TextStyle(color: colTextDark, fontWeight: FontWeight.bold),
+          "Bill ${sale['isStockSales'] == 1 ? "S" : "Q"}${sale['id']}",
+          style: TextStyle(
+            color: theme.primaryText,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        centerTitle: true,
         actions: [
           IconButton(
             onPressed: () {
-              SharePlus.instance.share(ShareParams(files: [XFile(bill_path)]));
+              if (bill_path.isNotEmpty) {
+                SharePlus.instance.share(
+                  ShareParams(files: [XFile(bill_path)]),
+                );
+              }
             },
             icon: CircleAvatar(
-              backgroundColor: colPrimary.withOpacity(0.1),
-              child: Icon(Icons.share, color: colPrimary, size: 20),
+              backgroundColor: theme.accentColor.withOpacity(0.1),
+              radius: 18,
+              child: Icon(Icons.share, color: theme.accentColor, size: 18),
             ),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: _isLoading
@@ -216,7 +218,7 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colCard, // Dynamic Card Color
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -299,7 +301,7 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colCard, // Dynamic Card Color
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
@@ -308,12 +310,14 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                           height: 40,
                           width: 40,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE3F2FD),
+                            color: theme.accentColor.withOpacity(
+                              0.1,
+                            ), // Match Accent
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.person,
-                            color: Color(0xFF1E88E5),
+                            color: theme.accentColor, // Match Accent
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -335,7 +339,6 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                                 color: colTextLight,
                               ),
                             ),
-                            // Show State info if available
                             if (_customer != null &&
                                 _customer!.state.isNotEmpty)
                               Text(
@@ -365,14 +368,15 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                   const SizedBox(height: 8),
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colCard, // Dynamic Card Color
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: ListView.separated(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _items.length,
-                      separatorBuilder: (ctx, i) => const Divider(height: 1),
+                      separatorBuilder: (ctx, i) =>
+                          Divider(height: 1, color: colBoxFill),
                       itemBuilder: (context, index) {
                         final item = _items[index];
                         return Padding(
@@ -387,7 +391,7 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                                 height: 30,
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
+                                  color: colBoxFill, // Dynamic inner box color
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -411,7 +415,7 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                                 ),
                               ),
                               Text(
-                                "₹${(item.amount).toStringAsFixed(0)}", // Note: SoldItem.amount is typically total for that line (qty*price)
+                                "₹${FunctionsHelper.format_double((item.amount).toStringAsFixed(0))}",
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.bold,
@@ -439,54 +443,65 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colCard, // Dynamic Card Color
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
                       children: [
                         _buildSummaryRow(
                           "Sub Total",
-                          "₹${sale['total_amount'] + sale['discount_amount']}",
+                          "₹${FunctionsHelper.format_int(sale['total_amount'] + sale['discount_amount'])}",
+                          colTextLight,
+                          colTextDark,
                         ),
 
                         if (sale['discount_amount'] > 0)
                           _buildSummaryRow(
                             "Discount",
-                            "- ₹${sale['discount_amount']}",
-                            color: Colors.green,
+                            "- ₹${FunctionsHelper.format_int(sale['discount_amount'])}",
+                            colTextLight,
+                            Colors.green,
                           ),
 
-                        // --- DYNAMIC TAX SECTION ---
                         if (totalGst > 0) ...[
                           if (isInterState)
                             _buildSummaryRow(
                               "IGST (Inter-State)",
-                              "+ ₹${totalGst.toStringAsFixed(2)}",
+                              "+ ₹${FunctionsHelper.format_double(totalGst.toStringAsFixed(2))}",
+                              colTextLight,
+                              colTextDark,
                             )
                           else ...[
                             _buildSummaryRow(
                               "CGST (Local)",
-                              "+ ₹${(totalGst / 2).toStringAsFixed(2)}",
+                              "+ ₹${FunctionsHelper.format_double((totalGst / 2).toStringAsFixed(2))}",
+                              colTextLight,
+                              colTextDark,
                             ),
                             _buildSummaryRow(
                               "SGST (Local)",
-                              "+ ₹${(totalGst / 2).toStringAsFixed(2)}",
+                              "+ ₹${FunctionsHelper.format_double((totalGst / 2).toStringAsFixed(2))}",
+                              colTextLight,
+                              colTextDark,
                             ),
                           ],
                         ],
 
-                        const Divider(height: 24),
+                        Divider(height: 24, color: colBoxFill),
                         _buildSummaryRow(
                           "Net Payable",
-                          "₹${sale['final_amount']}",
+                          "₹${FunctionsHelper.format_int(sale['final_amount'])}",
+                          colTextLight,
+                          colTextDark,
                           isBold: true,
                           fontSize: 16,
                         ),
                         if (!isPaid)
                           _buildSummaryRow(
                             "Paid Amount",
-                            "₹$paid",
-                            color: colTextLight,
+                            "₹${FunctionsHelper.format_int(paid)}",
+                            colTextLight,
+                            colTextLight,
                           ),
                       ],
                     ),
@@ -497,10 +512,8 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
             ),
       // Floating Print Button
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          _printBill(context);
-        },
-        backgroundColor: colPrimary,
+        onPressed: () => _printBill(context),
+        backgroundColor: colPrimary, // Dynamic Accent Color
         icon: const Icon(Icons.print, color: Colors.white),
         label: const Text(
           "PRINT BILL",
@@ -511,11 +524,13 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
     );
   }
 
+  // Helper Widget
   Widget _buildSummaryRow(
     String label,
-    String value, {
+    String value,
+    Color labelColor,
+    Color valueColor, {
     bool isBold = false,
-    Color? color,
     double fontSize = 14,
   }) {
     return Padding(
@@ -527,7 +542,7 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
             label,
             style: TextStyle(
               fontSize: fontSize,
-              color: colTextLight,
+              color: labelColor,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -535,7 +550,7 @@ class _BillDetailsScreenState extends State<BillDetailsScreen> {
             value,
             style: TextStyle(
               fontSize: fontSize,
-              color: color ?? colTextDark,
+              color: valueColor,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             ),
           ),

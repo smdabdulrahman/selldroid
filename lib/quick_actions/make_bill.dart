@@ -1,37 +1,38 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/quick_actions/make_bill/all_bills_view.dart';
 import 'package:selldroid/quick_actions/make_bill/customer_report.dart';
 import 'package:selldroid/quick_actions/make_bill/quick_sale.dart';
 import 'package:selldroid/quick_actions/make_bill/stock_sale.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class MakeBillScreen extends StatelessWidget {
   const MakeBillScreen({super.key});
 
-  // Color Palette (Consistent with your App)
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color cardColor = Colors.white;
-  static const Color accentColor = Color(0xFF2585A1); // Teal
-  static const Color iconBgColor = Color(
-    0xFFE0F7FA,
-  ); // Light Cyan for icon background
+  final Color iconBgColor = const Color(0xFFF3F4F6);
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+
+    final bgColor = theme.bgColor;
+    final primaryText = theme.primaryText;
+    final secondaryText = theme.secondaryText;
+    final accentColor = theme.accentColor;
+    final cardColor = theme.cardColor;
     return Scaffold(
-      backgroundColor: bgColor,
+      backgroundColor: theme.bgColor,
       appBar: AppBar(
-        backgroundColor: bgColor,
+        backgroundColor: theme.bgColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: primaryText),
+          icon: Icon(Icons.arrow_back, color: theme.primaryText),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           "Make Bill",
           style: TextStyle(
-            color: primaryText,
+            color: theme.primaryText,
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -44,7 +45,7 @@ class MakeBillScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 "Select a billing method to proceed:",
                 style: TextStyle(
                   color: secondaryText,
@@ -56,6 +57,10 @@ class MakeBillScreen extends StatelessWidget {
 
               // --- Option 1: Stock Sale ---
               _buildOptionCard(
+                cardColor: cardColor,
+                primaryText: primaryText,
+                secondaryText: secondaryText,
+                accentColor: accentColor,
                 icon: Icons.inventory_2, // Box icon
                 title: "Stock Sale",
                 subtitle: "Sell items directly from inventory",
@@ -76,6 +81,10 @@ class MakeBillScreen extends StatelessWidget {
 
               // --- Option 2: Quick Sale ---
               _buildOptionCard(
+                cardColor: cardColor,
+                primaryText: primaryText,
+                secondaryText: secondaryText,
+                accentColor: accentColor,
                 icon: Icons.flash_on, // Lightning icon
                 title: "Quick Sale",
                 subtitle: "Rapid billing for custom items",
@@ -96,6 +105,10 @@ class MakeBillScreen extends StatelessWidget {
 
               // --- Option 3: Customer Report ---
               _buildOptionCard(
+                cardColor: cardColor,
+                primaryText: primaryText,
+                secondaryText: secondaryText,
+                accentColor: accentColor,
                 icon: Icons.person_search, // User search icon
                 title: "Customer Report",
                 subtitle: "View billing history and details",
@@ -112,6 +125,10 @@ class MakeBillScreen extends StatelessWidget {
               ),
               const SizedBox(height: 16),
               _buildOptionCard(
+                cardColor: cardColor,
+                primaryText: primaryText,
+                secondaryText: secondaryText,
+                accentColor: accentColor,
                 icon: Icons.person_search, // User search icon
                 title: "View all Bills",
                 subtitle: "View billing history and details",
@@ -138,6 +155,10 @@ class MakeBillScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required VoidCallback onTap,
+    required Color cardColor,
+    required Color primaryText,
+    required Color secondaryText,
+    required Color accentColor,
   }) {
     return Material(
       color: Colors.transparent,
@@ -162,7 +183,7 @@ class MakeBillScreen extends StatelessWidget {
               // Circular Icon Background
               Container(
                 padding: const EdgeInsets.all(12),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: iconBgColor,
                   shape: BoxShape.circle,
                 ),
@@ -178,7 +199,7 @@ class MakeBillScreen extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                         color: primaryText,
@@ -187,10 +208,7 @@ class MakeBillScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: secondaryText,
-                      ),
+                      style: TextStyle(fontSize: 13, color: secondaryText),
                     ),
                   ],
                 ),

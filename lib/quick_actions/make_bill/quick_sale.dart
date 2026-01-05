@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/models/general_models.dart';
@@ -11,6 +12,7 @@ import 'package:selldroid/models/sold_item.dart';
 import 'package:selldroid/quick_actions/make_bill/all_bills_view.dart';
 import 'package:selldroid/quick_actions/make_bill/bill_view.dart';
 import 'package:selldroid/show_dialog_boxes.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class QuickSaleScreen extends StatefulWidget {
   const QuickSaleScreen({super.key});
@@ -20,14 +22,6 @@ class QuickSaleScreen extends StatefulWidget {
 }
 
 class _QuickSaleScreenState extends State<QuickSaleScreen> {
-  // --- Colors ---
-  static const Color bgColor = Color(0xFFE8ECEF);
-  static const Color primaryText = Color(0xFF46494C);
-  static const Color secondaryText = Color(0xFF757575);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color inputFill = Color(0xFFF3F4F6);
-
   // --- Data ---
   List<Customer> _customers = [];
   List<String> _stateNames = [];
@@ -380,7 +374,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              title: const Text(
+              title: Text(
                 "Payment Details",
                 style: TextStyle(
                   color: primaryText,
@@ -426,7 +420,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Total Bill:",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -435,7 +429,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                             ),
                             Text(
                               "₹${grandTotal.toStringAsFixed(2)}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 18,
                                 color: primaryText,
@@ -490,18 +484,18 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                         controller: payCtrl,
                         keyboardType: TextInputType.number,
                         autofocus: true,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: accentColor,
                         ),
                         decoration: InputDecoration(
                           labelText: "Received / Paying Amount",
-                          labelStyle: const TextStyle(color: secondaryText),
+                          labelStyle: TextStyle(color: secondaryText),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          prefixIcon: const Icon(
+                          prefixIcon: Icon(
                             Icons.currency_rupee,
                             color: accentColor,
                           ),
@@ -522,7 +516,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 "Balance to Return:",
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -566,7 +560,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                                     const SizedBox(height: 8),
                                     Text(
                                       "Scan to Pay ₹$currentEnteredAmount",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         color: accentColor,
                                       ),
@@ -738,7 +732,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
         dropdownColor: Colors.white,
         borderRadius: BorderRadius.circular(8),
         onChanged: onChanged,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           color: primaryText,
           fontWeight: FontWeight.bold,
@@ -782,7 +776,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
           const SizedBox(width: 6),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               color: secondaryText,
               fontWeight: FontWeight.bold,
               fontSize: 12,
@@ -833,7 +827,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
         focusNode: focus,
         onEditingComplete: onEdit,
         onChanged: (v) => setState(() {}),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           color: primaryText,
           fontWeight: FontWeight.w600,
@@ -872,7 +866,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
               controller: ctrl,
               focusNode: focus,
               onFieldSubmitted: (v) => onEdit(),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: "State",
                 filled: true,
                 fillColor: inputFill,
@@ -1013,13 +1007,25 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
     );
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+  late Color accentColor;
+  late Color cardColor;
+  final inputFill = Colors.grey.shade100;
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
     bool isInclusive = _prefs?.isGstInclusive ?? false;
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "Quick Sale",
           style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
         ),
@@ -1042,11 +1048,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
         ],
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: primaryText,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -1398,7 +1400,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                                 children: [
                                   Text(
                                     item.itemName,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,
                                       color: primaryText,
@@ -1420,7 +1422,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                                 children: [
                                   Text(
                                     "${item.qty} x ${item.amount / item.qty}",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       color: secondaryText,
                                     ),
@@ -1486,7 +1488,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "PAYMENT SUMMARY",
                             style: TextStyle(
                               fontSize: 12,
@@ -1499,7 +1501,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 "Discount %",
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
@@ -1516,7 +1518,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                                   keyboardType: TextInputType.number,
                                   textAlign: TextAlign.center,
                                   onChanged: (v) => setState(() {}),
-                                  decoration: const InputDecoration(
+                                  decoration: InputDecoration(
                                     filled: true,
                                     fillColor: inputFill,
                                     contentPadding: EdgeInsets.symmetric(
@@ -1566,7 +1568,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 "Grand Total",
                                 style: TextStyle(
                                   fontSize: 16,
@@ -1576,7 +1578,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                               ),
                               Text(
                                 "₹${_calculateSummary()['final_amount']!.toStringAsFixed(2)}",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                   color: accentColor,
@@ -1610,7 +1612,7 @@ class _QuickSaleScreenState extends State<QuickSaleScreen> {
                       ),
                     ),
                   ] else
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(40),
                       child: Center(
                         child: Text(

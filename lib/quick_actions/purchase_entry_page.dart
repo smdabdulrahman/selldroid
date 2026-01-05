@@ -3,6 +3,7 @@ import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/helpers/functions_helper.dart';
 import 'package:selldroid/home.dart';
@@ -12,6 +13,7 @@ import 'package:selldroid/models/shop.dart';
 import 'package:selldroid/quick_actions/purchase_history.dart';
 import 'package:selldroid/settings/purchaser_info_list.dart';
 import 'package:selldroid/show_dialog_boxes.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class PurchaseEntryScreen extends StatefulWidget {
   const PurchaseEntryScreen({super.key});
@@ -21,14 +23,6 @@ class PurchaseEntryScreen extends StatefulWidget {
 }
 
 class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
-  // --- Colors ---
-  static const Color bgColor = Color(0xFFF1F5F9);
-  static const Color primaryText = Color(0xFF334155);
-  static const Color secondaryText = Color(0xFF64748B);
-  static const Color accentColor = Color(0xFF2585A1);
-  static const Color cardColor = Colors.white;
-  static const Color inputFill = Color(0xFFF8F9FA);
-
   // --- Data & State ---
   DateTime _selectedDate = DateTime.now();
   List<SupplierInfo> _suppliers = [];
@@ -298,11 +292,24 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
     }
   }
 
+  late Color bgColor;
+  late Color primaryText;
+  late Color secondaryText;
+
+  late Color accentColor;
+  late Color cardColor;
+  final inputFill = const Color(0xFFF3F4F6);
   @override
   Widget build(BuildContext context) {
     double displayBase = 0;
     double displayTax = 0;
     double displayTotal = 0;
+    final theme = context.watch<ThemeProvider>();
+    bgColor = theme.bgColor;
+    primaryText = theme.primaryText;
+    secondaryText = theme.secondaryText;
+    accentColor = theme.accentColor;
+    cardColor = theme.cardColor;
 
     for (var item in _cartItems) {
       var details = _calculateTaxDetails(
@@ -322,7 +329,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
     return Scaffold(
       backgroundColor: bgColor,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "New Purchase Entry",
           style: TextStyle(color: primaryText, fontWeight: FontWeight.bold),
         ),
@@ -330,16 +337,12 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
         elevation: 0,
         centerTitle: true,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios_new,
-            color: primaryText,
-            size: 20,
-          ),
+          icon: Icon(Icons.arrow_back_ios_new, color: primaryText, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.history, color: accentColor),
+            icon: Icon(Icons.history, color: accentColor),
             tooltip: "History",
             onPressed: () => Navigator.push(
               context,
@@ -427,7 +430,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text(
+                            Text(
                               "Add Items",
                               style: TextStyle(
                                 fontSize: 14,
@@ -647,7 +650,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                                 ),
                                 child: Text(
                                   "${item.qty}x",
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: primaryText,
                                   ),
@@ -660,7 +663,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                                   children: [
                                     Text(
                                       item.itemName,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
                                         color: primaryText,
@@ -668,7 +671,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                                     ),
                                     Text(
                                       "@ ₹${FunctionsHelper.num_format.format(item.amount.toInt())} (${_isTaxInclusive ? 'Incl.' : 'Excl.'}) + ₹${FunctionsHelper.num_format.format(double.parse(taxDetails['tax']!.toStringAsFixed(1)))} Tax",
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontSize: 12,
                                         color: secondaryText,
                                       ),
@@ -678,7 +681,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                               ),
                               Text(
                                 "₹${FunctionsHelper.format_double(taxDetails['total']!.toStringAsFixed(2))}",
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                   color: primaryText,
@@ -731,7 +734,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 "Discount",
                                 style: TextStyle(
                                   color: secondaryText,
@@ -762,7 +765,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                           const SizedBox(height: 10),
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 "Paid Amount",
                                 style: TextStyle(
                                   color: primaryText,
@@ -809,7 +812,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                       ),
                     ),
                   ] else
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.all(30),
                       child: Text(
                         "Cart is empty",
@@ -888,7 +891,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
         onEditingComplete: onEdit,
         textAlign: align,
         onChanged: (v) => setState(() {}),
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 14,
           color: primaryText,
           fontWeight: FontWeight.w600,
@@ -923,7 +926,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             color: secondaryText,
             fontWeight: FontWeight.bold,
@@ -954,7 +957,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
                       value: item,
                       child: Text(
                         displayItem(item),
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: primaryText,
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -981,7 +984,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 12,
             color: secondaryText,
             fontWeight: FontWeight.bold,
@@ -1001,7 +1004,7 @@ class _PurchaseEntryScreenState extends State<PurchaseEntryScreen> {
             children: [
               Text(
                 value,
-                style: const TextStyle(
+                style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: primaryText,
                 ),
