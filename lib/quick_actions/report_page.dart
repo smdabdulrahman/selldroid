@@ -11,7 +11,6 @@ import 'package:selldroid/quick_actions/reports/supplier_report.dart';
 import 'package:selldroid/theme_provider.dart';
 
 // import 'package:selldroid/customer_report.dart'; // Uncomment when ready to link real pages
-// import 'package:selldroid/expense_screen.dart';
 
 class ReportHubScreen extends StatefulWidget {
   const ReportHubScreen({super.key});
