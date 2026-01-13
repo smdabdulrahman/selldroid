@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/helpers/print_helper.dart';
 import 'package:selldroid/models/general_models.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class ConfigurePage extends StatefulWidget {
   const ConfigurePage({super.key});
@@ -125,6 +127,7 @@ class _ConfigurePageState extends State<ConfigurePage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
     return Scaffold(
       backgroundColor: const Color(0xFFE8ECEF),
       appBar: AppBar(
@@ -269,7 +272,7 @@ class _ConfigurePageState extends State<ConfigurePage> {
                               style: TextStyle(color: Colors.white),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF2585A1),
+                              backgroundColor: theme.accentColor,
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),

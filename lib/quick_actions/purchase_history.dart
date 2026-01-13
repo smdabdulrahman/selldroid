@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/bill_view_purchase.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/helpers/functions_helper.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class PurchaseHistoryScreen extends StatefulWidget {
   const PurchaseHistoryScreen({super.key});
@@ -13,10 +15,10 @@ class PurchaseHistoryScreen extends StatefulWidget {
 
 class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
   // --- Colors ---
-  final Color colBackground = const Color(0xFFEFF2F5);
-  final Color colPrimary = const Color(0xFF127D95);
-  final Color colTextDark = const Color(0xFF2D3436);
-  final Color colTextLight = const Color(0xFF636E72);
+  late Color colBackground = const Color(0xFFEFF2F5);
+  late Color colPrimary = const Color(0xFF127D95);
+  late Color colTextDark = const Color(0xFF2D3436);
+  late Color colTextLight = const Color(0xFF636E72);
 
   List<Map<String, dynamic>> _allPurchases = []; // Master list
   List<Map<String, dynamic>> _filteredList = []; // Display list
@@ -202,6 +204,8 @@ class _PurchaseHistoryScreenState extends State<PurchaseHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
+    colPrimary = theme.accentColor;
     return Scaffold(
       backgroundColor: colBackground,
       appBar: AppBar(

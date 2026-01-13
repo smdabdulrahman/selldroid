@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 
 import 'package:selldroid/models/general_models.dart';
+import 'package:selldroid/theme_provider.dart';
 
 class ExpenseCategoriesScreen extends StatefulWidget {
   const ExpenseCategoriesScreen({super.key});
@@ -52,7 +54,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> {
   }
 
   // --- UI: Show Dialog ---
-  void _showAddDialog() {
+  void _showAddDialog(ThemeProvider theme) {
     final controller = TextEditingController();
     showDialog(
       context: context,
@@ -76,7 +78,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2585A1),
+                backgroundColor: theme.accentColor,
               ),
               onPressed: () {
                 _addCategory(controller.text);
@@ -92,6 +94,7 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = context.watch<ThemeProvider>();
     return Scaffold(
       backgroundColor: const Color(0xFFE8ECEF),
       appBar: AppBar(
@@ -104,8 +107,8 @@ class _ExpenseCategoriesScreenState extends State<ExpenseCategoriesScreen> {
         iconTheme: const IconThemeData(color: Colors.black),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showAddDialog,
-        backgroundColor: const Color(0xFF2585A1),
+        onPressed: () => _showAddDialog(theme),
+        backgroundColor: theme.accentColor,
         icon: const Icon(Icons.add, color: Colors.white),
         label: const Text("Add New", style: TextStyle(color: Colors.white)),
       ),
