@@ -51,9 +51,7 @@ jobs:
       - name: Build appBundle
         run: flutter build appbundle  --build-number=${{ github.run_number }}
 
-        #8 Building Web
-      - name: Build Web
-        run: flutter build web
+     
 
         #9 Upload Artifacts
       - name: Upload Artifacts
