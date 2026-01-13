@@ -6,7 +6,7 @@
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
 <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
     <application
-        android:label="selldroid"
+        android:label="Selldroid"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
