@@ -1071,6 +1071,8 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                               index,
                                             );
                                             int qty = () {
+                                              if (!_prefs!.manageStock)
+                                                return 9999;
                                               int cart_qty = 0;
                                               _cartItems.forEach((i) {
                                                 if (i.itemName ==
@@ -1082,7 +1084,9 @@ class _StockSaleScreenState extends State<StockSaleScreen> {
                                             }();
 
                                             return InkWell(
-                                              onTap: () => qty == 0
+                                              onTap: () =>
+                                                  !_prefs!.manageStock &&
+                                                      qty == 0
                                                   ? showErrorSnackBar(
                                                       "This item is currently out of stock",
                                                       context,
