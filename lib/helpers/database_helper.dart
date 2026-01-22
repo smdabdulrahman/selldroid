@@ -182,7 +182,7 @@ class DatabaseHelper {
       'CREATE TABLE $tableExpensesList (id INTEGER PRIMARY KEY AUTOINCREMENT, expense_type TEXT)',
     );
     await db.execute(
-      'CREATE TABLE $tablePrinter (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)',
+      'CREATE TABLE $tablePrinter (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, width INTEGER)',
     );
     await db.execute(
       'CREATE TABLE $tableCurrency (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT)',
@@ -517,9 +517,9 @@ class DatabaseHelper {
     return maps.isNotEmpty ? Printer.fromMap(maps.first) : null;
   }
 
-  Future<void> setPrinter(String name) async {
+  Future<void> setPrinter(String name, int width) async {
     Database db = await instance.database;
-    Printer newPrinter = Printer(id: 1, name: name);
+    Printer newPrinter = Printer(id: 1, name: name, width: width);
     int count = await db.update(
       tablePrinter,
       newPrinter.toMap(),

@@ -193,10 +193,11 @@ class SupplierInfo {
 class Printer {
   int? id;
   String name;
-  Printer({this.id, required this.name});
-  Map<String, dynamic> toMap() => {'id': id, 'name': name};
+  int width;
+  Printer({this.id, required this.name, required this.width});
+  Map<String, dynamic> toMap() => {'id': id, 'name': name, 'width': width};
   factory Printer.fromMap(Map<String, dynamic> map) =>
-      Printer(id: map['id'], name: map['name']);
+      Printer(id: map['id'], name: map['name'], width: map['width']);
 }
 
 class Currency {

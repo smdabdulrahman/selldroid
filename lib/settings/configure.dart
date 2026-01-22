@@ -18,6 +18,9 @@ class _ConfigurePageState extends State<ConfigurePage> {
   String? _connectedPrinterName;
   bool _isLoading = true;
 
+  // New State for Paper Size
+  int? _paperSize; // Default to 3 inch
+
   // Global Currency List (Symbol + Name)
   final List<String> _currencyList = [
     "₹ (INR)",
@@ -46,8 +49,6 @@ class _ConfigurePageState extends State<ConfigurePage> {
     Currency? savedCurrency = await DatabaseHelper.instance.getCurrency();
     String dbSymbol = savedCurrency?.name ?? "₹";
 
-    // Logic: Match the saved symbol (e.g., "$") to our full list item ("$ (USD)")
-    // If no match found, fallback to the first item that starts with it, or default.
     String matchedCurrency = _currencyList.firstWhere(
       (element) => element.startsWith(dbSymbol),
       orElse: () => "₹ (INR)",
@@ -56,19 +57,21 @@ class _ConfigurePageState extends State<ConfigurePage> {
     // 2. Fetch Printer using your Model
     Printer? savedPrinter = await DatabaseHelper.instance.getPrinter();
 
+    // 3. (Optional) Fetch Paper Size if you have a method for it
+    // int savedSize = await DatabaseHelper.instance.getPaperSize() ?? 2;
+
     setState(() {
       _currentCurrency = matchedCurrency;
-      _connectedPrinterName =
-          savedPrinter?.name; // Accessing .name from your model
+      _connectedPrinterName = savedPrinter?.name;
+      if (savedPrinter != null) _paperSize = savedPrinter!.width;
+
       _isLoading = false;
     });
   }
 
   // --- SAVE LOGIC ---
   Future<void> _saveCurrency(String fullString) async {
-    // We only want to save the symbol (e.g., "₹") into the DB, not "₹ (INR)"
     String symbol = fullString.split(" ")[0];
-
     await DatabaseHelper.instance.setCurrency(symbol);
 
     setState(() => _currentCurrency = fullString);
@@ -78,10 +81,25 @@ class _ConfigurePageState extends State<ConfigurePage> {
   }
 
   Future<void> _savePrinter(String name) async {
-    await DatabaseHelper.instance.setPrinter(name);
-
+    if (_paperSize == null) {
+      setState(() {
+        _paperSize = 3;
+      });
+    }
+    await DatabaseHelper.instance.setPrinter(name, _paperSize!);
     setState(() => _connectedPrinterName = name);
-    Navigator.pop(context); // Close dialog
+    Navigator.pop(context);
+  }
+
+  // Helper to change paper size
+  void _selectPaperSize(int size) {
+    setState(() {
+      _paperSize = size;
+    });
+    if (_connectedPrinterName != null && _connectedPrinterName!.isNotEmpty) {
+      DatabaseHelper.instance.setPrinter(_connectedPrinterName!, _paperSize!);
+    }
+    // Add DatabaseHelper.instance.setPaperSize(size) here if needed
   }
 
   // --- UI: Scan Dialog (Simulated) ---
@@ -99,7 +117,6 @@ class _ConfigurePageState extends State<ConfigurePage> {
       builder: (context) {
         return AlertDialog(
           title: const Text("Paired Bluetooth Devices"),
-
           content: SizedBox(
             width: double.maxFinite,
             child: ListView.builder(
@@ -125,9 +142,41 @@ class _ConfigurePageState extends State<ConfigurePage> {
     );
   }
 
+  // --- WIDGET: Modern Paper Size Button ---
+  Widget _buildPaperSizeBtn(int size, String label, Color accentColor) {
+    bool isSelected = _paperSize == size;
+    return Expanded(
+      child: InkWell(
+        onTap: () => _selectPaperSize(size),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? accentColor : Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isSelected ? accentColor : Colors.grey.shade300,
+              width: 1.5,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isSelected ? Colors.white : Colors.black54,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = context.watch<ThemeProvider>();
+
     return Scaffold(
       backgroundColor: const Color(0xFFE8ECEF),
       appBar: AppBar(
@@ -220,7 +269,36 @@ class _ConfigurePageState extends State<ConfigurePage> {
                       ],
                     ),
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // --- NEW: Paper Size Selection ---
+                        const Text(
+                          "Paper Size",
+                          style: TextStyle(color: Colors.grey, fontSize: 12),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            _buildPaperSizeBtn(
+                              2,
+                              "2 Inch (58mm)",
+                              theme.accentColor,
+                            ),
+                            const SizedBox(width: 15),
+                            _buildPaperSizeBtn(
+                              3,
+                              "3 Inch (80mm)",
+                              theme.accentColor,
+                            ),
+                          ],
+                        ),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20),
+                          child: Divider(),
+                        ),
+
+                        // --- Existing: Printer Connection ---
                         Row(
                           children: [
                             Container(
@@ -280,8 +358,10 @@ class _ConfigurePageState extends State<ConfigurePage> {
                             ),
                           ),
                         ),
-                        Text(
+                        const SizedBox(height: 10),
+                        const Text(
                           "Only paired devices can be selected. Please pair your printer in Bluetooth settings first.",
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
                         ),
                       ],
                     ),

@@ -4,7 +4,7 @@ import 'package:downloadsfolder/downloadsfolder.dart';
 import 'package:flutter/services.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:printing/printing.dart';
+import 'package:printing/printing.dart' as pr;
 import 'package:path/path.dart'; // Needed for join()
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:selldroid/helpers/database_helper.dart';
@@ -58,7 +58,7 @@ class PdfBillHelper {
     required PreferenceModel prefs,
   }) async {
     final doc = pw.Document();
-
+    Printer? printer = await DatabaseHelper.instance.getPrinter();
     pw.MemoryImage? logoImage;
     if (shop.logo.isNotEmpty && File(shop.logo).existsSync()) {
       final imageBytes = File(shop.logo).readAsBytesSync();
@@ -77,7 +77,9 @@ class PdfBillHelper {
     );
     doc.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat.roll80,
+        pageFormat: printer!.width == 3
+            ? PdfPageFormat.roll80
+            : PdfPageFormat.roll57,
         margin: const pw.EdgeInsets.all(5),
         build: (pw.Context context) {
           return _buildBillContent(
@@ -92,6 +94,7 @@ class PdfBillHelper {
             prefs,
             qrImage,
             fontforRupee,
+            printer,
           );
         },
       ),
@@ -167,15 +170,19 @@ class PdfBillHelper {
     PreferenceModel prefs,
     pw.MemoryImage? qrImage,
     pw.Font fontforRupee,
+    Printer? printer,
   ) {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final timeFormat = DateFormat('hh:mm:ss a');
     final DateTime billDate = DateTime.parse(sale.billedDate);
 
-    const textStyle = pw.TextStyle(fontSize: 9);
-    final boldStyle = pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
+    var textStyle = pw.TextStyle(fontSize: printer!.width == 3 ? 9 : 8);
+    var boldStyle = pw.TextStyle(
+      fontSize: printer!.width == 3 ? 9 : 8,
+      fontWeight: pw.FontWeight.bold,
+    );
     final headerStyle = pw.TextStyle(
-      fontSize: 16,
+      fontSize: 10,
       fontWeight: pw.FontWeight.bold,
     );
 
@@ -209,7 +216,7 @@ class PdfBillHelper {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Container(
-                  width: 200,
+                  width: printer!.width == 3 ? 200 : 150,
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
@@ -226,7 +233,7 @@ class PdfBillHelper {
                 ),
                 pw.Padding(padding: pw.EdgeInsets.all(1)),
                 pw.Container(
-                  width: 190,
+                  width: printer!.width == 3 ? 190 : 142,
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
@@ -264,7 +271,10 @@ class PdfBillHelper {
           children: [
             pw.Expanded(
               flex: 2,
-              child: pw.Text("Product Name", style: boldStyle),
+              child: pw.Text(
+                printer.width == 3 ? "Product Name" : "Product",
+                style: boldStyle,
+              ),
             ),
             pw.Expanded(
               flex: 2,
@@ -437,6 +447,7 @@ class PdfBillHelper {
                     return _buildSummaryRow(
                       "IGST ${key}%",
                       gsts[key]!.toStringAsFixed(1),
+                      printer,
                     );
 
                   return pw.Column(
@@ -444,10 +455,12 @@ class PdfBillHelper {
                       _buildSummaryRow(
                         "SGST ${key / 2}%",
                         (gsts[key]! / 2).toStringAsFixed(1),
+                        printer,
                       ),
                       _buildSummaryRow(
                         "CGST ${key / 2}%",
                         (gsts[key]! / 2).toStringAsFixed(1),
+                        printer,
                       ),
                       pw.SizedBox(height: 3),
                     ],
@@ -460,6 +473,7 @@ class PdfBillHelper {
           _buildSummaryRow(
             "Discount Amount",
             "${sale.discountAmount.toStringAsFixed(1)}",
+            printer,
           ),
         _buildDashedLine(),
         pw.SizedBox(height: 3),
@@ -505,7 +519,7 @@ class PdfBillHelper {
         pw.SizedBox(height: 5),
         pw.Center(
           child: pw.Text(
-            "Technology Partner BUYP - 1800 890 0803",
+            "Technology Partner BUYP ${printer.width == 3 ? "-" : "\n    "} 1800 890 0803",
             style: boldStyle,
           ),
         ),
@@ -525,16 +539,26 @@ class PdfBillHelper {
     );
   }
 
-  static pw.Widget _buildSummaryRow(String label, String value) {
+  static pw.Widget _buildSummaryRow(
+    String label,
+    String value,
+    Printer? printer,
+  ) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(vertical: 1),
       width: 220,
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(label, style: const pw.TextStyle(fontSize: 9)),
+          pw.Text(
+            label,
+            style: pw.TextStyle(fontSize: printer!.width == 3 ? 9 : 8),
+          ),
           pw.SizedBox(width: 20),
-          pw.Text(value, style: pw.TextStyle(fontSize: 9)),
+          pw.Text(
+            value,
+            style: pw.TextStyle(fontSize: printer!.width == 3 ? 9 : 8),
+          ),
         ],
       ),
     );
