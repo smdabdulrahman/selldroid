@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:selldroid/gst_stock_settings.dart';
 import 'package:selldroid/home.dart';
+import 'package:selldroid/introduction_screen.dart';
 import 'package:selldroid/theme_provider.dart';
 import 'package:sqflite/sqflite.dart';
 

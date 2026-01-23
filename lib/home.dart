@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // REQUIRED: Add intl to pubspec.yaml
 import 'package:provider/provider.dart';
+import 'package:selldroid/introduction_screen.dart';
 import 'package:selldroid/quick_actions/expenses.dart';
 import 'package:selldroid/quick_actions/payments_page.dart';
 import 'package:selldroid/quick_actions/purchase_entry_page.dart';

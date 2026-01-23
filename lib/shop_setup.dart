@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:selldroid/helpers/database_helper.dart';
 import 'package:selldroid/helpers/file_helper.dart';
 import 'package:selldroid/home.dart';
+import 'package:selldroid/introduction_screen.dart';
 import 'package:selldroid/models/shop.dart';
 
 class ShopSetupScreen extends StatefulWidget {
@@ -161,7 +162,7 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
           context,
           MaterialPageRoute(
             builder: (context) {
-              return HomeScreen();
+              return IntroScreen();
             },
           ),
         );
