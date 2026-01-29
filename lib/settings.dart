@@ -32,9 +32,7 @@ class SettingsScreen extends StatelessWidget {
 
   static const Color destructiveColor = Color(0xFFEF5350);
 
-  // --- Logic: Reset Bill Number ---
   Future<void> _resetBillNumber(BuildContext context) async {
-    // Show Warning Dialog
     bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
