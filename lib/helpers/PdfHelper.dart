@@ -56,6 +56,7 @@ class PdfBillHelper {
     required String customerPlace,
     required String customerState,
     required PreferenceModel prefs,
+    required int paper_size,
   }) async {
     final doc = pw.Document();
     Printer? printer = await DatabaseHelper.instance.getPrinter();
@@ -77,7 +78,7 @@ class PdfBillHelper {
     );
     doc.addPage(
       pw.Page(
-        pageFormat: printer!.width == 3
+        pageFormat: paper_size == 3
             ? PdfPageFormat.roll80
             : PdfPageFormat.roll57,
         margin: const pw.EdgeInsets.all(5),
@@ -175,10 +176,12 @@ class PdfBillHelper {
     final dateFormat = DateFormat('dd/MM/yyyy');
     final timeFormat = DateFormat('hh:mm:ss a');
     final DateTime billDate = DateTime.parse(sale.billedDate);
+    int paper_size = 3;
+    if (printer != null) paper_size = printer!.width;
 
-    var textStyle = pw.TextStyle(fontSize: printer!.width == 3 ? 9 : 8);
+    var textStyle = pw.TextStyle(fontSize: paper_size == 3 ? 9 : 8);
     var boldStyle = pw.TextStyle(
-      fontSize: printer!.width == 3 ? 9 : 8,
+      fontSize: paper_size == 3 ? 9 : 8,
       fontWeight: pw.FontWeight.bold,
     );
     final headerStyle = pw.TextStyle(
@@ -216,7 +219,7 @@ class PdfBillHelper {
               crossAxisAlignment: pw.CrossAxisAlignment.start,
               children: [
                 pw.Container(
-                  width: printer!.width == 3 ? 200 : 150,
+                  width: paper_size == 3 ? 200 : 150,
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
@@ -233,7 +236,7 @@ class PdfBillHelper {
                 ),
                 pw.Padding(padding: pw.EdgeInsets.all(1)),
                 pw.Container(
-                  width: printer!.width == 3 ? 190 : 142,
+                  width: paper_size == 3 ? 190 : 142,
                   child: pw.Row(
                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                     children: [
@@ -272,7 +275,7 @@ class PdfBillHelper {
             pw.Expanded(
               flex: 2,
               child: pw.Text(
-                printer.width == 3 ? "Product Name" : "Product",
+                paper_size == 3 ? "Product Name" : "Product",
                 style: boldStyle,
               ),
             ),
@@ -448,6 +451,7 @@ class PdfBillHelper {
                       "IGST ${key}%",
                       gsts[key]!.toStringAsFixed(1),
                       printer,
+                      paper_size,
                     );
 
                   return pw.Column(
@@ -456,11 +460,13 @@ class PdfBillHelper {
                         "SGST ${key / 2}%",
                         (gsts[key]! / 2).toStringAsFixed(1),
                         printer,
+                        paper_size,
                       ),
                       _buildSummaryRow(
                         "CGST ${key / 2}%",
                         (gsts[key]! / 2).toStringAsFixed(1),
                         printer,
+                        paper_size,
                       ),
                       pw.SizedBox(height: 3),
                     ],
@@ -474,6 +480,7 @@ class PdfBillHelper {
             "Discount Amount",
             "${sale.discountAmount.toStringAsFixed(1)}",
             printer,
+            paper_size,
           ),
         _buildDashedLine(),
         pw.SizedBox(height: 3),
@@ -519,7 +526,7 @@ class PdfBillHelper {
         pw.SizedBox(height: 5),
         pw.Center(
           child: pw.Text(
-            "Technology Partner BUYP ${printer.width == 3 ? "-" : "\n    "} 1800 890 0803",
+            "Technology Partner BUYP ${paper_size == 3 ? "-" : "\n    "} 1800 890 0803",
             style: boldStyle,
           ),
         ),
@@ -543,6 +550,7 @@ class PdfBillHelper {
     String label,
     String value,
     Printer? printer,
+    int paper_size,
   ) {
     return pw.Container(
       padding: const pw.EdgeInsets.symmetric(vertical: 1),
@@ -552,12 +560,12 @@ class PdfBillHelper {
         children: [
           pw.Text(
             label,
-            style: pw.TextStyle(fontSize: printer!.width == 3 ? 9 : 8),
+            style: pw.TextStyle(fontSize: paper_size == 3 ? 9 : 8),
           ),
           pw.SizedBox(width: 20),
           pw.Text(
             value,
-            style: pw.TextStyle(fontSize: printer!.width == 3 ? 9 : 8),
+            style: pw.TextStyle(fontSize: paper_size == 3 ? 9 : 8),
           ),
         ],
       ),
