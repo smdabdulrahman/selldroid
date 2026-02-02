@@ -56,10 +56,11 @@ class PdfBillHelper {
     required String customerPlace,
     required String customerState,
     required PreferenceModel prefs,
-    required int paper_size,
   }) async {
     final doc = pw.Document();
     Printer? printer = await DatabaseHelper.instance.getPrinter();
+    int paper_size = 3;
+    if (printer != null) paper_size = printer.width;
     pw.MemoryImage? logoImage;
     if (shop.logo.isNotEmpty && File(shop.logo).existsSync()) {
       final imageBytes = File(shop.logo).readAsBytesSync();
