@@ -19,11 +19,6 @@ import 'package:selldroid/shop_setup.dart';
 import 'package:selldroid/theme_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
-// import 'add_stock_screen.dart';       // Create this later
-// import 'manage_cash_modes.dart';      // Create this later
-// import 'manage_customers.dart';       // Create this later
-// import 'manage_purchasers.dart';      // Create this later
-// import 'manage_expense_types.dart';   // Create this later
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
