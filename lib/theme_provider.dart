@@ -68,7 +68,7 @@ class ThemeProvider extends ChangeNotifier {
     _saveToPrefs();
   }
 
-  // --- 6. RESET Method (Corrected) ---
+  // --- 6. RESET Method  ---
   Future<void> resetTheme() async {
     // 1. Revert internal variables to the Defaults defined at the top
     _bgColor = defaultBgColor;
