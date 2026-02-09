@@ -193,7 +193,7 @@ class _ShopSetupScreenState extends State<ShopSetupScreen> {
           child: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             children: [
-              // --- 1. Logo Upload ---
+            
               Container(
                 decoration: BoxDecoration(
                   color: cardColor,

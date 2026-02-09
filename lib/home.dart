@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:in_app_update/in_app_update.dart';
 import 'package:intl/intl.dart'; // REQUIRED: Add intl to pubspec.yaml
 import 'package:provider/provider.dart';
 import 'package:selldroid/introduction_screen.dart';
@@ -41,6 +42,23 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _setCurrentDate();
     _loadDashboardData();
+    _checkForUpdates();
+  }
+
+  Future<bool> _checkForUpdates() async {
+    try {
+      final info = await InAppUpdate.checkForUpdate();
+      print("Update Availability: ${info.updateAvailability}");
+
+      if (info.updateAvailability == UpdateAvailability.updateAvailable) {
+        InAppUpdate.startFlexibleUpdate();
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("Update Error: $e");
+      return false;
+    }
   }
 
   void _setCurrentDate() {
