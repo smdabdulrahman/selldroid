@@ -68,7 +68,7 @@ jobs:
           git config --global user.email "actions@github.com"
 
           git clone https://x-access-token:${TOKEN}@github.com/smdabdulrahman/selldroid-releases.git
-          cd apk-releases
+          cd selldroid-releases
 
           mkdir -p android
           cp ../build/app/outputs/flutter-apk/app-release.apk android/app-${{ env.VERSION }}.apk
