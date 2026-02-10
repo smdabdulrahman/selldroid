@@ -72,7 +72,9 @@ jobs:
 
           mkdir -p android
           cp ../build/app/outputs/flutter-apk/app-release.apk android/app-${{ env.VERSION }}.apk
+          cp ../build/app/outputs/bundle/release/app-release.aab apk-releases/app-${{ env.VERSION }}.aab
 
+          
           git add .
           git commit -m "Add APK v${{ env.VERSION }}" || echo "No changes to commit"
           git push
